@@ -19,7 +19,9 @@
         --glass-border: rgba(255, 255, 255, 0.1);
         --grad: linear-gradient(135deg, #da8300 0%, #a76400 100%);
     }
-
+.badge-retirada { background: #ff5722 !important; } /* Laranja */
+.badge-entrega { background: #25d366 !important; }  /* Verde WhatsApp */
+.badge-local { background: #4e44ff !important; }    /* Azul */
     /* CORREÇÃO: Impede o scroll lateral e o "fantasma" do menu */
     html, body {
         margin: 0;
@@ -443,26 +445,35 @@ const db = getFirestore(app);
 
     // --- RENDERIZAÇÃO ---
     function renderMesas() {
-        const container = document.getElementById('container-mesas');
-        if (!container) return;
-        container.innerHTML = mesas.map(m => `
-            <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
-                <div style="font-size:2rem; margin-bottom:10px;"><i class="fas fa-couch"></i></div>
-                <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
-                <div style="font-size:0.75rem; color:#777; margin:10px 0; height:40px; overflow:hidden;">
-                    ${m.itens.map(i => i.n).join(', ') || 'Disponível'}
-                </div>
-                <div style="color:var(--gold); font-weight:700; margin-bottom:15px;">R$ ${m.total.toFixed(2)}</div>
-                <div style="display:flex; gap:8px;">
-                    ${!m.aberta ? 
-                        `<button class="btn-confirm" onclick="abrirMesa(${m.n})">ABRIR</button>` :
-                        `<button class="btn-confirm" style="background:#333; flex:1;" onclick="prepararAdd(${m.n})"><i class="fas fa-plus"></i></button>
-                         <button class="btn-confirm" style="background:#2e7d32; flex:1;" onclick="fecharMesa(${m.n})"><i class="fas fa-check"></i></button>`
-                    }
-                </div>
+    const container = document.getElementById('container-mesas');
+    if (!container) return;
+    
+    container.innerHTML = mesas.map(m => `
+        <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
+            <div style="font-size:2rem; margin-bottom:10px;"><i class="fas fa-couch"></i></div>
+            <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
+            
+            <div style="font-size:0.75rem; color:#bbb; margin:10px 0; max-height:80px; overflow-y:auto; text-align:left;">
+                ${m.itens.length > 0 ? m.itens.map(i => `
+                    <div style="margin-bottom:4px; border-left: 2px solid var(--gold); padding-left:5px;">
+                        <b>${i.n}</b>
+                        ${i.obs ? `<br><span style="color:var(--gold); font-style:italic;">(${i.obs})</span>` : ''}
+                    </div>
+                `).join('') : '<i>Disponível</i>'}
             </div>
-        `).join('');
-    }
+
+            <div style="color:var(--gold); font-weight:700; margin-bottom:15px;">R$ ${m.total.toFixed(2)}</div>
+            
+            <div style="display:flex; gap:8px;">
+                ${!m.aberta ? 
+                    `<button class="btn-confirm" onclick="abrirMesa(${m.n})">ABRIR</button>` :
+                    `<button class="btn-confirm" style="background:#333; flex:1;" onclick="prepararAdd(${m.n})"><i class="fas fa-plus"></i></button>
+                     <button class="btn-confirm" style="background:#2e7d32; flex:1;" onclick="fecharMesa(${m.n})"><i class="fas fa-check"></i></button>`
+                }
+            </div>
+        </div>
+    `).join('');
+}
 
     function renderMenu() {
         const container = document.getElementById('sanfona-menu');
@@ -498,16 +509,70 @@ const db = getFirestore(app);
     };
 
     window.addItemTemp = (id, n, p) => {
-        const obs = document.getElementById(`obs-${id}`).value;
-        carrinhoTemp.push({ n, p, obs, q: 1 });
-        document.getElementById(`obs-${id}`).value = "";
-        renderTemp();
-    };
+    const obsInput = document.getElementById(`obs-${id}`);
+    const obs = obsInput.value;
+    
+    carrinhoTemp.push({ n, p, obs, q: 1 });
+    obsInput.value = ""; // Limpa a obs após adicionar
+    
+    renderTemp();
 
-    function renderTemp() {
-        document.getElementById('lista-temp').innerText = carrinhoTemp.map(i => i.n).join(', ');
-        document.getElementById('total-temp').innerText = `R$ ${carrinhoTemp.reduce((acc, i) => acc + i.p, 0).toFixed(2)}`;
+    // Aviso de Adicionado
+    Swal.fire({
+        text: `+ ${n} adicionado`,
+        target: '#menu-lateral', // Aparece dentro do menu lateral
+        toast: true,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#2e7d32',
+        color: '#fff'
+    });
+};
+
+window.removeItemTemp = (index) => {
+    const itemRemovido = carrinhoTemp[index].n;
+    carrinhoTemp.splice(index, 1);
+    renderTemp();
+
+    // Aviso de Removido
+    Swal.fire({
+        text: `- ${itemRemovido} removido`,
+        target: '#menu-lateral',
+        toast: true,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#c62828',
+        color: '#fff'
+    });
+};
+
+   function renderTemp() {
+    const listaTemp = document.getElementById('lista-temp');
+    const totalTemp = document.getElementById('total-temp');
+    
+    if (carrinhoTemp.length === 0) {
+        listaTemp.innerHTML = "<i>Nenhum item selecionado...</i>";
+        totalTemp.innerText = "R$ 0,00";
+        return;
     }
+
+    listaTemp.innerHTML = carrinhoTemp.map((i, index) => `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">
+            <div style="flex:1">
+                <b style="color:white;">${i.n}</b>
+                ${i.obs ? `<br><small style="color:var(--gold);">Obs: ${i.obs}</small>` : ''}
+            </div>
+            <button onclick="removeItemTemp(${index})" style="background:none; border:none; color:#ff4d4d; cursor:pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+
+    const total = carrinhoTemp.reduce((acc, i) => acc + i.p, 0);
+    totalTemp.innerText = `R$ ${total.toFixed(2)}`;
+}
 
     window.enviarCozinha = async () => {
         if (carrinhoTemp.length === 0) return;
@@ -583,25 +648,34 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
         const trocoADevolver = (valorPago > val) ? (valorPago - val) : 0;
         const telefoneLimpo = p.telefone ? p.telefone.replace(/\D/g, '') : '';
         
-        const msgRecebido = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido foi recebido, por favor aguarde...`);
-        const msgEntrega = window.encodeURIComponent(`Seu pedido saiu para entrega, CHAPPA QUENTE agradece, volte sempre!`);
+        // --- LÓGICA DE TIPO DE PEDIDO ---
+        const isRetirada = p.tipoPedido === "RETIRADA" || p.end === "RETIRADA NO LOCAL";
+        const isMesa = p.end === 'Consumo Local';
         const emTransito = p.status === "saiu";
+
+        // Mensagens Inteligentes
+        const msgRecebido = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido foi recebido e já está em preparo! `);
+        const msgPronto = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido está PRONTO para retirada! Pode vir buscar. `);
+        const msgSaiuEntrega = window.encodeURIComponent(`Boas notícias ${p.nome}! Seu pedido saiu para entrega agora, ChappaQuente agradece! `);
 
         lista.innerHTML += `
             <div class="card" style="${emTransito ? 'border: 2px solid #25d366; background: #1a221c;' : ''}">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <div>
                         <strong style="font-size:1.1rem; color:var(--gold);">${p.nome || 'Cliente'}</strong>
-                        ${emTransito ? '<br><small style="color:#25d366; font-weight:bold; font-size:0.7rem;">● ENTREGUE</small>' : ''}
+                        ${emTransito ? `<br><small style="color:#25d366; font-weight:bold; font-size:0.7rem;">● ${isRetirada ? 'FINALIZADO' : 'EM TRÂNSITO'}</small>` : ''}
                     </div>
-                    <span class="badge ${p.end === 'Consumo Local' ? 'badge-local' : 'badge-site'}">
-                        ${p.end === 'Consumo Local' ? 'Mesa' : 'Delivery'}
+                    <span class="badge ${isMesa ? 'badge-local' : (isRetirada ? 'badge-retirada' : 'badge-site')}">
+                        ${isMesa ? 'Mesa' : (isRetirada ? '🥡 Retirada' : '🛵 Delivery')}
                     </span>
                 </div>
 
                 <div style="font-size:0.85rem; color:#ccc; margin-bottom:10px; line-height:1.4;">
-                    ${p.telefone ? `<div><i class="fas fa-phone" style="width:15px"></i> ${p.telefone}</div>` : ''}
-                    ${p.end && p.end !== 'Consumo Local' ? `<div><i class="fas fa-map-marker-alt" style="width:15px"></i> ${p.end}</div>` : ''}
+                    ${p.telefone ? `<div><i class="fab fa-whatsapp" style="width:15px; color:#25d366"></i> ${p.telefone}</div>` : ''}
+                    <div>
+                        <i class="fas ${isRetirada ? 'fa-store' : 'fa-map-marker-alt'}" style="width:15px"></i> 
+                        ${p.end}
+                    </div>
                 </div>
 
                 ${!emTransito && p.tipo === "SITE" ? `
@@ -610,9 +684,11 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
                                 style="flex:1; background:#333; color:#fff; border:1px solid #444; padding:8px; border-radius:8px; font-size:0.7rem; cursor:pointer; font-weight:600;">
                             CONFIRMAR
                         </button>
-                        <button onclick="mudarStatus('${id}', 'saiu', '${telefoneLimpo}', '${msgEntrega}')" 
-                                style="flex:1; background:#25d366; color:#fff; border:none; padding:8px; border-radius:8px; font-size:0.7rem; cursor:pointer; font-weight:800;">
-                            <i class="fas fa-motorcycle"></i> SAIU P/ ENTREGA
+                        
+                        <button onclick="mudarStatus('${id}', 'saiu', '${telefoneLimpo}', '${isRetirada ? msgPronto : msgSaiuEntrega}')" 
+                                style="flex:1; background:${isRetirada ? '#f39c12' : '#25d366'}; color:#fff; border:none; padding:8px; border-radius:8px; font-size:0.7rem; cursor:pointer; font-weight:800;">
+                            <i class="fas ${isRetirada ? 'fa-check-double' : 'fa-motorcycle'}"></i> 
+                            ${isRetirada ? 'PRONTO P/ RETIRADA' : 'SAIU P/ ENTREGA'}
                         </button>
                     </div>
                 ` : ''}
@@ -620,7 +696,7 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
                 <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
                     ${p.itens.map(i => `
                         <div class="item-row">
-                            <b>${i.q || i.quantidade || 1}x</b> ${i.n || i.nome || i.produto || 'Item'} 
+                            <b>${i.q || 1}x</b> ${i.n || 'Item'} 
                             ${i.obs ? `<br><small style="color:var(--gold); font-size:0.75rem;">Obs: ${i.obs}</small>` : ''}
                         </div>
                     `).join('')}
