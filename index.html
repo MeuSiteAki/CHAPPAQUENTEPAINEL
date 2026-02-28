@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
     <style>
     
@@ -168,10 +169,10 @@
 
     /* MESAS */
     .grid-mesas {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 15px;
-    }
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Mantém um tamanho confortável */
+    gap: 15px;
+}
 
     .mesa-card {
         background: var(--glass);
@@ -283,7 +284,8 @@
     </audio>
 
     <header>
-        <div class="logo-text">CHAPPA<span>QUENTE</span></div>
+        <!-- <img style="width: 80px;" src="logo.jpeg" alt=""> -->
+        <div class="logo-text"> CHAPPA<span>QUENTE</span> -  ADM</div>
         <div class="nav-container">
             <button class="tab-btn active" data-target="tab-pedidos" onclick="switchTab(this)"><i
                     class="fas fa-receipt"></i><span>Pedidos</span></button>
@@ -415,14 +417,22 @@ const db = getFirestore(app);
     let mesas = []; // Agora preenchido via Firebase
     let mesaAtiva = null, carrinhoTemp = [], somAtivo = true, carregado = false;
 
-    // --- INICIALIZAÇÃO DO BANCO (Executa 1x) ---
+   // --- INICIALIZAÇÃO DO BANCO (Atualizado para 10 mesas) ---
     async function inicializarMesas() {
         const mesasRef = collection(db, "estado_mesas");
         const snap = await getDocs(mesasRef);
-        if (snap.empty) {
-            for (let i = 1; i <= 5; i++) {
-                await setDoc(doc(db, "estado_mesas", `mesa_${i}`), { n: i, aberta: false, itens: [], total: 0 });
+        
+        if (snap.size < 10) { 
+            for (let i = 1; i <= 10; i++) {
+            
+                await setDoc(doc(db, "estado_mesas", `mesa_${i}`), { 
+                    n: i, 
+                    aberta: false, 
+                    itens: [], 
+                    total: 0 
+                }, { merge: true });
             }
+            console.log("Mesas inicializadas/atualizadas para 10 unidades.");
         }
     }
     inicializarMesas();
