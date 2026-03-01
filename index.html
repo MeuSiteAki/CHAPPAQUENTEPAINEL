@@ -518,9 +518,12 @@ const db = getFirestore(app);
         title: `ABRIR MESA ${n}`,
         input: 'radio',
         inputOptions: {
-            'ANA': 'ANA',
-            'BETO': 'BETO',
-            'CARLOS': 'CARLOS'
+            'LYANNA': 'LYANNA',
+            'LUCAS': 'LUCAS',
+            'RUAN': 'RUAN',
+            'LEONA': 'LEONA',
+            'FERNANDO': 'FERNANDO',
+            'EVILLIN': 'EVILLIN',
         },
         inputValidator: (value) => {
             if (!value) return 'Você precisa selecionar um garçom!';
@@ -819,6 +822,16 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
     };
 
     atualizarData(); renderMenu();
+
+    // Bloqueios de segurança (mantidos como no original)
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
+    if (e.key === 'F12') { e.preventDefault(); }
+});
+document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
+});
+document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
 </script>
 
 </body>
