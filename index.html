@@ -13,7 +13,7 @@
     <style>
     
     :root {
-        --primary: #ffbe31;
+        --primary: #ffffff;
         --gold: #ffbd59;
         --dark: #0d0d0d;
         --glass: rgba(255, 255, 255, 0.05);
@@ -454,14 +454,21 @@ const db = getFirestore(app);
     }
 
     // --- RENDERIZAÇÃO ---
-    function renderMesas() {
+   function renderMesas() {
     const container = document.getElementById('container-mesas');
     if (!container) return;
     
     container.innerHTML = mesas.map(m => `
         <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
             <div style="font-size:2rem; margin-bottom:10px;"><i class="fas fa-couch"></i></div>
+            
             <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
+            
+            ${m.aberta && m.garcom ? 
+                `<div style="color:var(--gold); font-size:0.75rem; font-weight:700; margin-top:2px; text-transform:uppercase;">
+                    <i class="fas fa-user-check" style="font-size:0.6rem;"></i> ${m.garcom}
+                </div>` : ''
+            }
             
             <div style="font-size:0.75rem; color:#bbb; margin:10px 0; max-height:80px; overflow-y:auto; text-align:left;">
                 ${m.itens.length > 0 ? m.itens.map(i => `
@@ -507,8 +514,32 @@ const db = getFirestore(app);
 
     // --- LÓGICA DE PEDIDOS (REALTIME) ---
     window.abrirMesa = async (n) => {
-        await updateDoc(doc(db, "estado_mesas", `mesa_${n}`), { aberta: true, total: 0, itens: [] });
-    };
+    const { value: garcom } = await Swal.fire({
+        title: `ABRIR MESA ${n}`,
+        input: 'radio',
+        inputOptions: {
+            'ANA': 'ANA',
+            'BETO': 'BETO',
+            'CARLOS': 'CARLOS'
+        },
+        inputValidator: (value) => {
+            if (!value) return 'Você precisa selecionar um garçom!';
+        },
+        confirmButtonText: 'ABRIR MESA',
+        background: '#fff',
+        color: '#0d0d0d',
+        confirmButtonColor: 'var(--gold)'
+    });
+
+    if (garcom) {
+        await updateDoc(doc(db, "estado_mesas", `mesa_${n}`), { 
+            aberta: true, 
+            total: 0, 
+            itens: [],
+            garcom: garcom // Salva o nome do garçom no estado da mesa
+        });
+    }
+};
 
     window.prepararAdd = (n) => { 
         mesaAtiva = n; 
@@ -608,24 +639,38 @@ window.removeItemTemp = (index) => {
     };
 
     window.fecharMesa = async (n) => {
-        const m = mesas.find(mesa => mesa.n === n);
-        const { value: forma } = await Swal.fire({
-            title: 'Pagamento MESA ' + n,
-            input: 'select',
-            inputOptions: { 'Dinheiro': 'Dinheiro', 'PIX': 'PIX', 'Cartão': 'Cartão' },
-            confirmButtonText: 'Finalizar',
-            showCancelButton: true
-        });
+    const m = mesas.find(mesa => mesa.n === n);
+    const { value: forma } = await Swal.fire({
+        title: 'Pagamento MESA ' + n,
+        html: `Atendente atual: <b>${m.garcom || 'Não definido'}</b>`, // Mostra quem atendeu no pop-up
+        input: 'select',
+        inputOptions: { 'Dinheiro': 'Dinheiro', 'PIX': 'PIX', 'Cartão': 'Cartão' },
+        confirmButtonText: 'Finalizar',
+        showCancelButton: true
+    });
 
-        if (forma) {
-            await addDoc(collection(db, "pedidos"), {
-                nome: `Mesa ${n}`, tipo: "FINALIZADO", itens: m.itens, totalFinal: m.total,
-                pagamento: forma, data: serverTimestamp(), end: "Consumo Local"
-            });
-            // Reseta a mesa no Firebase
-            await updateDoc(doc(db, "estado_mesas", `mesa_${n}`), { aberta: false, itens: [], total: 0 });
-        }
-    };
+    if (forma) {
+        await addDoc(collection(db, "pedidos"), {
+            nome: `Mesa ${n}`, 
+            tipo: "FINALIZADO", 
+            itens: m.itens, 
+            totalFinal: m.total,
+            pagamento: forma, 
+            garcom: m.garcom, // ESTA LINHA É ESSENCIAL
+            data: serverTimestamp(), 
+            end: "Consumo Local"
+        });
+        
+        // Reseta a mesa
+        await updateDoc(doc(db, "estado_mesas", `mesa_${n}`), { 
+            aberta: false, 
+            itens: [], 
+            total: 0, 
+            garcom: null 
+        });
+    }
+};
+
 window.mudarStatus = async (id, status, tel = null, msg = null) => {
     const pedidoRef = doc(db, "pedidos", id);
     await updateDoc(pedidoRef, { status: status });
@@ -639,7 +684,7 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
         renderMesas();
     });
 
- onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => {
+onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => {
     const lista = document.getElementById('lista-pedidos');
     let pix = 0, card = 0, din = 0;
     lista.innerHTML = "";
@@ -647,6 +692,8 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
     snap.forEach(docSnap => {
         const p = docSnap.data();
         const id = docSnap.id;
+        
+        // Ignora pedidos que ainda estão apenas na visualização da cozinha
         if (p.tipo === "COZINHA") return; 
 
         const val = parseFloat(p.totalFinal || p.total || 0);
@@ -663,7 +710,7 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
         const isMesa = p.end === 'Consumo Local';
         const emTransito = p.status === "saiu";
 
-        // Mensagens Inteligentes
+        // Mensagens Inteligentes para WhatsApp
         const msgRecebido = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido foi recebido e já está em preparo! `);
         const msgPronto = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido está PRONTO para retirada! Pode vir buscar. `);
         const msgSaiuEntrega = window.encodeURIComponent(`Boas notícias ${p.nome}! Seu pedido saiu para entrega agora, ChappaQuente agradece! `);
@@ -673,6 +720,13 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <div>
                         <strong style="font-size:1.1rem; color:var(--gold);">${p.nome || 'Cliente'}</strong>
+                        
+                        ${p.garcom ? `
+                            <div style="margin-top: 4px; color: #00d4ff; font-size: 0.85rem; font-weight: bold;">
+                                <i class="fas fa-user-tag"></i> Atendente: ${p.garcom}
+                            </div>
+                        ` : ''}
+                        
                         ${emTransito ? `<br><small style="color:#25d366; font-weight:bold; font-size:0.7rem;">● ${isRetirada ? 'FINALIZADO' : 'EM TRÂNSITO'}</small>` : ''}
                     </div>
                     <span class="badge ${isMesa ? 'badge-local' : (isRetirada ? 'badge-retirada' : 'badge-site')}">
@@ -732,6 +786,7 @@ window.mudarStatus = async (id, status, tel = null, msg = null) => {
             </div>`;
     });
 
+    // Atualização dos totais do caixa
     document.getElementById('b-pix').innerText = `R$ ${pix.toFixed(2)}`;
     document.getElementById('b-cartao').innerText = `R$ ${card.toFixed(2)}`;
     document.getElementById('b-dinheiro').innerText = `R$ ${din.toFixed(2)}`;
