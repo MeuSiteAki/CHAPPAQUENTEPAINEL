@@ -374,7 +374,7 @@ const db = getFirestore(app);
     // --- VARIÁVEIS DE ESTADO ---
     // --- CARDÁPIO COMPLETO PARA ATENDIMENTO DE MESAS ---
     const cardapio = {
-        "🍔 ARTESANAIS 120g": [
+        "🍔 ARTESANAIS 75g": [
             { id: 1, n: "Chappa Kids", p: 13.00 },
             { id: 2, n: "Chappa Quente", p: 14.00 },
             { id: 3, n: "X-Burguer", p: 15.00 },
@@ -386,7 +386,7 @@ const db = getFirestore(app);
             { id: 9, n: "Mega Chappa", p: 26.00 },
             { id: 10, n: "Cheddar Burguer", p: 28.00 }
         ],
-        "⭐ ARTESANAIS 75g": [
+        "⭐ ARTESANAIS 120g": [
             { id: 11, n: "Hambúrguer Clássico", p: 18.00 },
             { id: 12, n: "Cheddar Bacon", p: 22.00 },
             { id: 13, n: "Chappa Burguer Picante", p: 25.00 },
@@ -515,8 +515,8 @@ const db = getFirestore(app);
         `).join('');
     }
 
-    // --- LÓGICA DE PEDIDOS (REALTIME) ---
-    window.abrirMesa = async (n) => {
+   // --- LÓGICA DE PEDIDOS (REALTIME) ---
+window.abrirMesa = async (n) => {
     const { value: garcom } = await Swal.fire({
         title: `ABRIR MESA ${n}`,
         input: 'radio',
@@ -534,7 +534,42 @@ const db = getFirestore(app);
         confirmButtonText: 'ABRIR MESA',
         background: '#fff',
         color: '#0d0d0d',
-        confirmButtonColor: 'var(--gold)'
+        confirmButtonColor: 'var(--gold)',
+        customClass: {
+            input: 'minha-grid-garcons' // Classe para facilitar o acesso
+        },
+        didOpen: () => {
+            // Seleciona o container exato onde ficam os rádios
+            const radioContainer = document.querySelector('.swal2-radio');
+            if (radioContainer) {
+                radioContainer.style.display = 'grid';
+                radioContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                radioContainer.style.gap = '15px';
+                radioContainer.style.justifyContent = 'center';
+                radioContainer.style.alignItems = 'start';
+                radioContainer.style.flexDirection = 'row'; // Remove a coluna padrão
+                radioContainer.style.flexWrap = 'wrap';     // Garante a quebra
+            }
+
+            // Estiliza cada item (label) individualmente
+            const labels = radioContainer.querySelectorAll('label');
+            labels.forEach(label => {
+                label.style.display = 'flex';
+                label.style.flexDirection = 'column'; // Bolinha em cima do nome (opcional)
+                label.style.alignItems = 'center';
+                label.style.margin = '0';
+                label.style.fontSize = '12px';
+                label.style.fontWeight = 'bold';
+                
+                // Estilo para o texto (span) dentro do label
+                const span = label.querySelector('span');
+                if(span) span.style.marginLeft = '0';
+                
+                // Estilo para o input (bolinha)
+                const input = label.querySelector('input');
+                if(input) input.style.margin = '0 0 5px 0';
+            });
+        }
     });
 
     if (garcom) {
@@ -542,7 +577,7 @@ const db = getFirestore(app);
             aberta: true, 
             total: 0, 
             itens: [],
-            garcom: garcom // Salva o nome do garçom no estado da mesa
+            garcom: garcom 
         });
     }
 };
