@@ -872,6 +872,76 @@ document.addEventListener('keydown', function (event) {
 document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
 </script>
 
+
+<div id="caixa-overlay"></div>
+
+<script>
+// --- Função para gerar hash SHA-256 ---
+async function gerarHashSenha(senha) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(senha);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// --- Hash da senha correta (chapa2026@) ---
+const senhaHashCorreta = "276b353614283a1f5475b146b84785ff6c937a8fab745697b7f1c2ec425dd703";
+
+// --- Função de validação com olhinho ---
+async function validarSenha() {
+    const result = await Swal.fire({
+        title: 'Digite a senha',
+        html: `
+            <input type="password" id="senha-input" class="swal2-input" placeholder="Senha do administrador">
+            <button type="button" id="toggle-olho" style="margin-top:250px; background:#333; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">
+                👁 Mostrar/Ocultar
+            </button>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+            return document.getElementById('senha-input').value;
+        },
+        didOpen: () => {
+            const input = document.getElementById('senha-input');
+            const btnOlho = document.getElementById('toggle-olho');
+            btnOlho.addEventListener('click', () => {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+        },
+        showCancelButton: true
+    });
+
+    if (!result.value) return false;
+
+    const hashDigitada = await gerarHashSenha(result.value);
+    return hashDigitada === senhaHashCorreta;
+}
+
+// --- Proteção na aba Caixa ---
+const btnCaixa = document.querySelector('[data-target="tab-balanco"]');
+btnCaixa.addEventListener('click', async function(e) {
+    e.preventDefault();
+    const autorizado = await validarSenha();
+
+    if (!autorizado) {
+        Swal.fire({ icon: 'error', text: 'Senha incorreta ou cancelada!' });
+        // volta para Pedidos
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-pedidos').classList.add('active');
+        document.querySelector('[data-target="tab-pedidos"]').classList.add('active');
+        // mostra overlay preto cobrindo toda a tela
+        document.getElementById('caixa-overlay').style.display = "block";
+        return;
+    }
+
+    // remove overlay e mostra Caixa normalmente
+    document.getElementById('caixa-overlay').style.display = "none";
+    switchTab(this);
+});
+</script>
+
 </body>
 
 </html>
