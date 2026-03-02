@@ -363,7 +363,7 @@ const firebaseConfig = {
     authDomain: "app-de-demandas.firebaseapp.com",
     projectId: "app-de-demandas",
     storageBucket: "app-de-demandas.firebasestorage.app",
-    messagingSenderId: "857555550806",
+    messagingSenderId: "857555550806", 
     appId: "1:857555550806:web:e7cb602c680585f6c171f7",
     measurementId: "G-MZP03Y2R4J"
 };
@@ -839,29 +839,52 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
     carregado = true;
 });
 
-    // --- BOTÕES ADICIONAIS ---
-    document.getElementById('btn-som').onclick = function() {
-        somAtivo = !somAtivo;
-        this.style.background = somAtivo ? "#2e7d32" : "#555";
-        this.innerHTML = somAtivo ? '<i class="fas fa-bell"></i>' : '<i class="fas fa-bell-slash"></i>';
-    };
+   // --- BOTÕES ADICIONAIS ---
+document.getElementById('btn-som').onclick = function() {
+    somAtivo = !somAtivo;
+    this.style.background = somAtivo ? "#2e7d32" : "#555";
+    this.innerHTML = somAtivo ? '<i class="fas fa-bell"></i>' : '<i class="fas fa-bell-slash"></i>';
+};
 
-    document.getElementById('btn-limpar').onclick = async () => {
-        const res = await Swal.fire({ title: 'Zerar o Dia?', text: "Isso apaga os registros de vendas!", icon: 'warning', showCancelButton: true });
-        if (res.isConfirmed) {
-            const q = await getDocs(collection(db, "pedidos"));
-            q.forEach(d => deleteDoc(doc(db, "pedidos", d.id)));
-        }
-    };
+// ATUALIZADO: Botão de limpar agora pede a mesma senha do Caixa
+document.getElementById('btn-limpar').onclick = async () => {
+    // 1. Chama a função de senha que você já tem
+    const autorizado = await validarSenha();
 
-    window.gerarPDFBalanco = () => {
-        const el = document.getElementById('balanco-pdf');
-        html2pdf().from(el).set({ margin: 10, filename: 'fechamento.pdf', html2canvas: { scale: 2 } }).save();
-    };
+    if (!autorizado) {
+        Swal.fire({ icon: 'error', text: 'Senha incorreta! Ação abortada.' });
+        return;
+    }
 
-    atualizarData(); renderMenu();
+    // 2. Se a senha estiver correta, pede a confirmação final de segurança
+    const res = await Swal.fire({ 
+        title: 'Zerar o Dia?', 
+        text: "Senha confirmada. Deseja realmente apagar todos os registros de vendas?", 
+        icon: 'warning', 
+        showCancelButton: true,
+        confirmButtonColor: '#c62828',
+        confirmButtonText: 'Sim, apagar tudo!',
+        cancelButtonText: 'Cancelar'
+    });
 
-    // Bloqueios de segurança (mantidos como no original)
+    if (res.isConfirmed) {
+        const q = await getDocs(collection(db, "pedidos"));
+        const deletarPromises = [];
+        q.forEach(d => deletarPromises.push(deleteDoc(doc(db, "pedidos", d.id))));
+        
+        await Promise.all(deletarPromises);
+        Swal.fire('Zerado!', 'Os dados foram apagados com sucesso.', 'success');
+    }
+};
+
+window.gerarPDFBalanco = () => {
+    const el = document.getElementById('balanco-pdf');
+    html2pdf().from(el).set({ margin: 10, filename: 'fechamento.pdf', html2canvas: { scale: 2 } }).save();
+};
+
+atualizarData(); renderMenu();
+
+// Bloqueios de segurança
 document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
     if (e.key === 'F12') { e.preventDefault(); }
@@ -885,7 +908,7 @@ async function gerarHashSenha(senha) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// --- Hash da senha correta (chapa2026@) ---
+// --- Hash da senha correta 
 const senhaHashCorreta = "276b353614283a1f5475b146b84785ff6c937a8fab745697b7f1c2ec425dd703";
 
 // --- Função de validação com olhinho ---
@@ -894,8 +917,8 @@ async function validarSenha() {
         title: 'Digite a senha',
         html: `
             <input type="password" id="senha-input" class="swal2-input" placeholder="Senha do administrador">
-            <button type="button" id="toggle-olho" style="margin-top:250px; background:#333; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">
-                👁 Mostrar/Ocultar
+            <button type="button" id="toggle-olho" style="margin-top:220px; background:#333; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size: 0.8rem;">
+                👁 Mostrar/Ocultar Senha
             </button>
         `,
         focusConfirm: false,
@@ -909,10 +932,11 @@ async function validarSenha() {
                 input.type = input.type === 'password' ? 'text' : 'password';
             });
         },
-        showCancelButton: true
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar'
     });
 
-    if (!result.value) return false;
+    if (!result.isConfirmed || !result.value) return false;
 
     const hashDigitada = await gerarHashSenha(result.value);
     return hashDigitada === senhaHashCorreta;
@@ -925,18 +949,15 @@ btnCaixa.addEventListener('click', async function(e) {
     const autorizado = await validarSenha();
 
     if (!autorizado) {
-        Swal.fire({ icon: 'error', text: 'Senha incorreta ou cancelada!' });
-        // volta para Pedidos
+        Swal.fire({ icon: 'error', text: 'Senha incorreta!' });
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-pedidos').classList.add('active');
         document.querySelector('[data-target="tab-pedidos"]').classList.add('active');
-        // mostra overlay preto cobrindo toda a tela
         document.getElementById('caixa-overlay').style.display = "block";
         return;
     }
 
-    // remove overlay e mostra Caixa normalmente
     document.getElementById('caixa-overlay').style.display = "none";
     switchTab(this);
 });
