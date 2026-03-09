@@ -9,9 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
     <style>
-    
     :root {
         --primary: #ffffff;
         --gold: #ffbd59;
@@ -373,6 +371,7 @@ const db = getFirestore(app);
 
     // --- VARIÁVEIS DE ESTADO ---
     // --- CARDÁPIO COMPLETO PARA ATENDIMENTO DE MESAS ---
+    
     const cardapio = {
         "🍔 ARTESANAIS 75g": [
             { id: 1, n: "Chappa Kids", p: 13.00 },
@@ -419,7 +418,20 @@ const db = getFirestore(app);
     };
     let mesas = []; // Agora preenchido via Firebase
     let mesaAtiva = null, carrinhoTemp = [], somAtivo = true, carregado = false;
-
+const listaAdicionais = [
+    { n: "Hamb. 75g", p: 6.00 },
+    { n: "Bacon", p: 5.00 },
+    { n: "Calabresa", p: 5.00 },
+    { n: "Hamb. 120g", p: 8.00 },
+    { n: "Cheddar", p: 4.00 },
+    { n: "Salsicha", p: 3.00 },
+    { n: "Ovo", p: 3.00 },
+    { n: "Presunto", p: 3.00 },
+    { n: "Queijo", p: 3.00 },
+    { n: "Barbecue", p: 3.00 },
+    { n: "Banana", p: 3.00 },
+    { n: "Geleia Pimenta", p: 5.00 }
+];
    // --- INICIALIZAÇÃO DO BANCO (Atualizado para 10 mesas) ---
     async function inicializarMesas() {
         const mesasRef = collection(db, "estado_mesas");
@@ -495,25 +507,35 @@ const db = getFirestore(app);
     `).join('');
 }
 
-    function renderMenu() {
-        const container = document.getElementById('sanfona-menu');
-        container.innerHTML = Object.keys(cardapio).map(cat => `
-            <div class="cat-group">
-                <button class="cat-head" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                    ${cat} <i class="fas fa-angle-down"></i>
-                </button>
-                <div class="cat-content hidden" style="padding:15px; background:rgba(0,0,0,0.2);">
-                    ${cardapio[cat].map(i => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <div><b>${i.n}</b><br><span style="color:var(--gold);">R$ ${i.p.toFixed(2)}</span></div>
-                            <button class="btn-confirm" style="width:auto; padding:8px 15px;" onclick="addItemTemp('${i.id}','${i.n}',${i.p})">+</button>
+  function renderMenu() {
+    const container = document.getElementById('sanfona-menu');
+    if (!container) return; // Segurança caso o container não exista na tela
+    
+    container.innerHTML = Object.keys(cardapio).map(cat => `
+        <div class="cat-group">
+            <button class="cat-head" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                ${cat} <i class="fas fa-angle-down"></i>
+            </button>
+            <div class="cat-content hidden" style="padding:15px; background:rgba(0,0,0,0.2);">
+                ${cardapio[cat].map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div>
+                            <b>${i.n}</b><br>
+                            <span style="color:var(--gold);">R$ ${i.p.toFixed(2)}</span>
                         </div>
-                        <input type="text" id="obs-${i.id}" style="width:100%; background:#000; border:1px solid #333; color:white; padding:8px; border-radius:10px; margin-bottom:10px;" placeholder="Obs...">
-                    `).join('')}
-                </div>
+                        <button class="btn-confirm" style="width:auto; padding:8px 15px;" 
+                                onclick="addItemTemp('${i.id}','${i.n}',${i.p}, '${cat}')">
+                            +
+                        </button>
+                    </div>
+                    <input type="text" id="obs-${i.id}" 
+                           style="width:100%; background:#000; border:1px solid #333; color:white; padding:8px; border-radius:10px; margin-bottom:10px;" 
+                           placeholder="Obs...">
+                `).join('')}
             </div>
-        `).join('');
-    }
+        </div>
+    `).join('');
+}
 
    // --- LÓGICA DE PEDIDOS (REALTIME) ---
 window.abrirMesa = async (n) => {
@@ -534,7 +556,8 @@ window.abrirMesa = async (n) => {
         confirmButtonText: 'ABRIR MESA',
         background: '#fff',
         color: '#0d0d0d',
-        confirmButtonColor: 'var(--gold)',
+        fontweight: '800',
+        confirmButtonColor: '#da8300',
         customClass: {
             input: 'minha-grid-garcons' // Classe para facilitar o acesso
         },
@@ -590,23 +613,87 @@ window.abrirMesa = async (n) => {
         toggleMenu(true); 
     };
 
-    window.addItemTemp = (id, n, p) => {
+   window.addItemTemp = async (id, nomeOriginal, precoOriginal, categoria) => {
     const obsInput = document.getElementById(`obs-${id}`);
-    const obs = obsInput.value;
+    const observacaoDigitada = obsInput.value;
     
-    carrinhoTemp.push({ n, p, obs, q: 1 });
-    obsInput.value = ""; // Limpa a obs após adicionar
+    // LISTA DE CATEGORIAS QUE NÃO TÊM ADICIONAIS
+    const categoriasSemAdicionais = ["🥤 BEBIDAS", "🍺 CERVEJAS"];
     
+    let precoFinal = precoOriginal;
+    let obsFinal = observacaoDigitada;
+
+    // SÓ ABRE O POPUP SE NÃO FOR BEBIDA OU CERVEJA
+    if (!categoriasSemAdicionais.includes(categoria)) {
+        
+        const { value: resultado, isConfirmed } = await Swal.fire({
+            title: 'ADICIONAIS',
+            text: nomeOriginal,
+            target: '#menu-lateral',
+            html: `
+                <div id="container-adicionais" style="text-align:left; max-height:350px; overflow-y:auto; padding:5px;">
+                    ${listaAdicionais.map((ad, index) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:8px;">
+                            <div>
+                                <b style="font-size:0.9rem; color:#333;">${ad.n}</b><br>
+                                <span style="color:#2e7d32; font-weight:700; font-size:0.85rem;">+ R$ ${ad.p.toFixed(2)}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <button onclick="let inp=document.getElementById('ad-${index}'); if(inp.value > 0) inp.value--;" 
+                                        style="width:32px; height:32px; border-radius:8px; border:1px solid #ddd; background:#f8f8f8; font-weight:bold;">-</button>
+                                
+                                <input type="number" id="ad-${index}" value="0" min="0" readonly 
+                                       style="width:30px; border:none; text-align:center; font-weight:800; background:transparent; font-size:1.1rem; color:#000;">
+                                
+                                <button onclick="document.getElementById('ad-${index}').value++;" 
+                                        style="width:32px; height:32px; border-radius:8px; border:none; background:var(--gold); color:white; font-weight:bold;">+</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'CONFIRMAR',
+            cancelButtonText: 'SEM ADICIONAIS',
+            confirmButtonColor: '#2e7d32',
+            cancelButtonColor: '#888',
+        });
+
+        if (isConfirmed) {
+            let listaTextoAdicionais = [];
+            listaAdicionais.forEach((ad, index) => {
+                const qtd = parseInt(document.getElementById(`ad-${index}`).value);
+                if (qtd > 0) {
+                    precoFinal += (ad.p * qtd);
+                    listaTextoAdicionais.push(`${qtd} - ${ad.n}`);
+                }
+            });
+
+            if (listaTextoAdicionais.length > 0) {
+                const textoAds = "ADICIONAIS: " + listaTextoAdicionais.join(', ');
+                obsFinal = obsFinal ? `${obsFinal} | ${textoAds}` : textoAds;
+            }
+        }
+    }
+
+    // ADICIONA AO CARRINHO (Seja bebida direta ou lanche com/sem adicional)
+    carrinhoTemp.push({ 
+        n: nomeOriginal, 
+        p: precoFinal, 
+        obs: obsFinal, 
+        q: 1 
+    });
+    
+    obsInput.value = ""; 
     renderTemp();
 
-    // Aviso de Adicionado
     Swal.fire({
-        text: `+ ${n} adicionado`,
-        target: '#menu-lateral', // Aparece dentro do menu lateral
+        text: `+ ${nomeOriginal} adicionado!`,
+        target: '#menu-lateral',
         toast: true,
         position: 'top-right',
         showConfirmButton: false,
-        timer: 1500,
+        timer: 1000,
         background: '#2e7d32',
         color: '#fff'
     });
