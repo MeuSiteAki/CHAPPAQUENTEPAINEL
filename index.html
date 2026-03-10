@@ -271,7 +271,34 @@
         .tab-btn span { font-size: 0.7rem; }
         .logo-text { font-size: 1.2rem; }
     }
+/* Garante que o card da mesa aceite posições absolutas dentro dele */
+.mesa-card {
+    position: relative; 
+}
 
+/* Estilo do botão X discreto */
+.btn-cancelar-topo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 77, 77, 0.1);
+    border: none;
+    color: #ff4d4d;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+
+.btn-cancelar-topo:hover {
+    background: #ff4d4d;
+    color: white;
+}
     </style>
 </head>
 
@@ -409,11 +436,19 @@ const db = getFirestore(app);
             { id: 24, n: "H2O Limoneto 500ml", p: 7.00 },
             { id: 25, n: "Água mineral (sem gás)", p: 3.00 },
             { id: 26, n: "Suco Natural", p: 7.00 },
-            { id: 27, n: "Coca-Cola", p: 7.00 }
+            { id: 27, n: "Coca-Cola", p: 7.00 },
+            { id: 34, n: "Água 1,5 litros", p: 7.00 },
+            { id: 35, n: "Red Bull", p: 13.00 }
         ],
         "🍺 CERVEJAS": [
             { id: 28, n: "Latas 269ml", p: 5.00 },
             { id: 29, n: "Long Neck 330ml", p: 10.00 }
+        ],
+        "🍬 DIVERSOS": [
+            { id: 30, n: "Trident", p: 3.00 },
+            { id: 31, n: "Halls", p: 3.00 },
+            { id: 32, n: "Balas", p: 0.20 },
+            { id: 33, n: "Balas diversas 6 uni.", p: 1.00 },
         ]
     };
     let mesas = []; // Agora preenchido via Firebase
@@ -469,12 +504,19 @@ const listaAdicionais = [
     }
 
     // --- RENDERIZAÇÃO ---
-   function renderMesas() {
+function renderMesas() {
     const container = document.getElementById('container-mesas');
     if (!container) return;
     
     container.innerHTML = mesas.map(m => `
         <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
+            
+            ${m.aberta ? `
+                <button class="btn-cancelar-topo" onclick="cancelarMesa(${m.n})">
+                    <i class="fas fa-times"></i>
+                </button>
+            ` : ''}
+
             <div style="font-size:2rem; margin-bottom:10px;"><i class="fas fa-couch"></i></div>
             
             <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
@@ -499,14 +541,58 @@ const listaAdicionais = [
             <div style="display:flex; gap:8px;">
                 ${!m.aberta ? 
                     `<button class="btn-confirm" onclick="abrirMesa(${m.n})">ABRIR</button>` :
-                    `<button class="btn-confirm" style="background:#333; flex:1;" onclick="prepararAdd(${m.n})"><i class="fas fa-plus"></i></button>
-                     <button class="btn-confirm" style="background:#2e7d32; flex:1;" onclick="fecharMesa(${m.n})"><i class="fas fa-check"></i></button>`
+                    `
+                    <button class="btn-confirm" style="background:#333; flex:1;" onclick="prepararAdd(${m.n})">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="btn-confirm" style="background:#2e7d32; flex:1;" onclick="fecharMesa(${m.n})">
+                        <i class="fas fa-check"></i>
+                    </button>`
                 }
             </div>
         </div>
     `).join('');
 }
+//cancelar mesas
+window.cancelarMesa = async (n) => {
+    const res = await Swal.fire({
+        title: `CANCELAR MESA ${n}?`,
+        text: "O consumo será apagado e não irá para o caixa.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c62828',
+        confirmButtonText: 'Sim, cancelar',
+        cancelButtonText: 'Voltar'
+    });
 
+    if (res.isConfirmed) {
+        // 1. Resetar o estado da mesa no banco de dados
+        const mesaRef = doc(db, "estado_mesas", `mesa_${n}`);
+        await updateDoc(mesaRef, { 
+            aberta: false, 
+            itens: [], 
+            total: 0, 
+            garcom: null 
+        });
+
+        // 2. Opcional: Limpar pedidos de "COZINHA" dessa mesa que ainda estão pendentes
+        // Isso evita que a cozinha prepare algo de uma mesa que acabou de ser cancelada
+        const q = query(collection(db, "pedidos"), where("nome", "==", `MESA ${n}`), where("tipo", "==", "COZINHA"));
+        const snap = await getDocs(q);
+        snap.forEach(async (d) => {
+            await deleteDoc(doc(db, "pedidos", d.id));
+        });
+
+        Swal.fire({
+            title: 'Mesa Cancelada',
+            icon: 'success',
+            toast: true,
+            position: 'top-end',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+};
   function renderMenu() {
     const container = document.getElementById('sanfona-menu');
     if (!container) return; // Segurança caso o container não exista na tela
@@ -618,7 +704,7 @@ window.abrirMesa = async (n) => {
     const observacaoDigitada = obsInput.value;
     
     // LISTA DE CATEGORIAS QUE NÃO TÊM ADICIONAIS
-    const categoriasSemAdicionais = ["🥤 BEBIDAS", "🍺 CERVEJAS"];
+    const categoriasSemAdicionais = ["🥤 BEBIDAS", "🍺 CERVEJAS", "🍬 DIVERSOS"];
     
     let precoFinal = precoOriginal;
     let obsFinal = observacaoDigitada;
@@ -1048,6 +1134,8 @@ btnCaixa.addEventListener('click', async function(e) {
     document.getElementById('caixa-overlay').style.display = "none";
     switchTab(this);
 });
+
+
 </script>
 
 </body>
