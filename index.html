@@ -299,6 +299,34 @@
     background: #ff4d4d;
     color: white;
 }
+/* Botão de excluir pedido no card */
+.btn-excluir-pedido {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #ff4d4d;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.btn-excluir-pedido:hover {
+    background: #ff4d4d;
+    color: white;
+}
+
+/* Garante que o card seja o ponto de referência para o botão */
+.card {
+    position: relative;
+}
     </style>
 </head>
 
@@ -907,7 +935,6 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
         const p = docSnap.data();
         const id = docSnap.id;
         
-        // Ignora pedidos que ainda estão apenas na visualização da cozinha
         if (p.tipo === "COZINHA") return; 
 
         const val = parseFloat(p.totalFinal || p.total || 0);
@@ -919,18 +946,22 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
         const trocoADevolver = (valorPago > val) ? (valorPago - val) : 0;
         const telefoneLimpo = p.telefone ? p.telefone.replace(/\D/g, '') : '';
         
-        // --- LÓGICA DE TIPO DE PEDIDO ---
         const isRetirada = p.tipoPedido === "RETIRADA" || p.end === "RETIRADA NO LOCAL";
         const isMesa = p.end === 'Consumo Local';
         const emTransito = p.status === "saiu";
 
-        // Mensagens Inteligentes para WhatsApp
         const msgRecebido = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido foi recebido e já está em preparo! `);
         const msgPronto = window.encodeURIComponent(`Olá ${p.nome}! Seu pedido está PRONTO para retirada! Pode vir buscar. `);
         const msgSaiuEntrega = window.encodeURIComponent(`Boas notícias ${p.nome}! Seu pedido saiu para entrega agora, ChappaQuente agradece! `);
 
         lista.innerHTML += `
             <div class="card" style="${emTransito ? 'border: 2px solid #25d366; background: #1a221c;' : ''}">
+                
+                <button class="btn-excluir-pedido" onclick="deletarPedidoDireto('${id}')" 
+                        style="position:absolute; top:70px; right:30px; background:rgba(255,255,255,0.1); border:none; color:#ff4d4d; border-radius:8px; width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;">
+                    <i class="fas fa-trash"></i>
+                </button>
+
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <div>
                         <strong style="font-size:1.1rem; color:var(--gold);">${p.nome || 'Cliente'}</strong>
@@ -1000,7 +1031,7 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
             </div>`;
     });
 
-    // Atualização dos totais do caixa
+    // Atualização dos totais do caixa...
     document.getElementById('b-pix').innerText = `R$ ${pix.toFixed(2)}`;
     document.getElementById('b-cartao').innerText = `R$ ${card.toFixed(2)}`;
     document.getElementById('b-dinheiro').innerText = `R$ ${din.toFixed(2)}`;
@@ -1012,6 +1043,45 @@ onSnapshot(query(collection(db, "pedidos"), orderBy("data", "desc")), (snap) => 
     carregado = true;
 });
 
+// X dos cards
+window.deletarPedidoDireto = async (id) => {
+    // 1. Valida a senha usando sua função existente
+    const autorizado = await validarSenha();
+
+    if (!autorizado) {
+        Swal.fire({ icon: 'error', text: 'Senha incorreta! Pedido mantido.' });
+        return;
+    }
+
+    // 2. Confirmação final
+    const confirmacao = await Swal.fire({
+        title: 'Excluir Pedido?',
+        text: "Isso removerá o pedido permanentemente sem somar ao caixa.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, deletar!',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (confirmacao.isConfirmed) {
+        try {
+            await deleteDoc(doc(db, "pedidos", id));
+            Swal.fire({
+                title: 'Deletado!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            console.error("Erro ao deletar:", error);
+            Swal.fire('Erro', 'Não foi possível deletar o pedido.', 'error');
+        }
+    }
+};
    // --- BOTÕES ADICIONAIS ---
 document.getElementById('btn-som').onclick = function() {
     somAtivo = !somAtivo;
