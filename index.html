@@ -1004,12 +1004,12 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
         snap.forEach(docSnap => {
             const p = docSnap.data();
             const id = docSnap.id;
-            if (p.tipo === "COZINHA") return;
+           if (p.tipo === "COZINHA" || p.tipo === "PARCIAL") return;
 
             const val = parseFloat(p.totalFinal || p.total || 0);
             if (p.pagamento === "PIX") pix += val;
             else if (p.pagamento === "Cartão") card += val;
-            else din += val;
+            else if (p.pagamento === "Dinheiro") din += val;
 
             const valorPago       = parseFloat(p.trocoPara || 0);
             const trocoADevolver  = (valorPago > val) ? (valorPago - val) : 0;
