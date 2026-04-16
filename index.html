@@ -380,61 +380,87 @@ window.navegarParaAba = async (elemento, idAba) => {
 <main>
 
     <!-- ABA: LANÇAMENTO RÁPIDO (PDV/WhatsApp) -->
-    <section id="tab-pdv" class="tab-content active">
-        <div class="pdv-container">
-            <div class="pdv-menu">
-                <h3 style="color:var(--gold); margin-bottom:15px; display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-bolt"></i> LANÇAMENTO RÁPIDO
-                </h3>
-                <div id="categorias-pdv" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:15px; scrollbar-width:none;"></div>
-                <div id="grid-atalhos" class="grid-atalhos" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; max-height:250px; overflow-y:auto;"></div>
-            </div>
-            <div class="pdv-checkout">
-                <div class="card-cliente">
-                    <div style="display:flex; gap:8px; margin-bottom:10px;">
-                        <input type="text" id="pdv-nome" placeholder="Nome do Cliente" class="pdv-input" style="flex:1; margin-bottom:0;">
-                        <p>CLIENTES:</p>
-                        <button onclick="abrirListaClientes()" title="Agenda de Clientes" style="background:var(--gold); color:black; border:none; border-radius:8px; width:45px; cursor:pointer;">
-                            <i class="fas fa-address-book"></i>
-                        </button>
-                    </div>
-                    <div style="display:flex; gap:8px; margin-bottom:10px;">
-                        <input type="tel" id="pdv-tel" placeholder="WhatsApp (DDD)" class="pdv-input" style="flex:1; margin-bottom:0;">
-                        <p>SALVAR:</p>
-                        <button onclick="salvarClienteBase()" title="Salvar Cliente" style="background:#28a745; color:white; border:none; border-radius:8px; width:45px; cursor:pointer;">
-                            <i class="fas fa-save"></i>
-                        </button>
-                    </div>
-                    <input type="text" id="pdv-end" placeholder="Endereço (Rua, Número, Bairro)" class="pdv-input">
-                    <div style="display:flex; gap:8px; margin-bottom:10px;">
-                        <select id="pdv-pagamento" class="pdv-input" style="flex:1; border:1px solid var(--gold); color:var(--gold); font-weight:bold; background:#000;">
-                            <option value="Dinheiro"> DINHEIRO</option>
-                            <option value="PIX"> PIX</option>
-                            <option value="Cartão"> CARTÃO</option>
-                        </select>
-                        <select id="pdv-tipo" class="pdv-input" style="flex:1;">
-                            <option value="DELIVERY">🛵 DELIVERY</option>
-                            <option value="RETIRADA">🥡 RETIRADA</option>
-                        </select>
-                    </div>
-                    <textarea id="pdv-obs" placeholder="Observações..." class="pdv-input" style="height:60px; padding:10px; resize:none; font-size:0.85rem;"></textarea>
-                </div>
-                <div id="pdv-lista-itens" class="pdv-lista" style="background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:15px;">
-                    <p style="text-align:center; color:#444; margin-top:30px;">Carrinho vazio</p>
-                </div>
-                <div class="pdv-total-section" style="border-top:2px solid #333; padding-top:15px;">
-                    <div style="display:flex; justify-content:space-between; font-size:1.6rem; font-weight:900; margin-bottom:15px;">
-                        <span>TOTAL:</span>
-                        <span id="pdv-total-valor" style="color:var(--gold);">R$ 0,00</span>
-                    </div>
-                    <button onclick="confirmarPedidoPDV()" class="btn-finalizar-pdv" style="width:100%; padding:18px; font-size:1.1rem; font-weight:bold; border-radius:12px;">
-                        LANÇAR PEDIDO <i class="fas fa-paper-plane" style="margin-left:8px;"></i>
+   <section id="tab-pdv" class="tab-content active">
+    <div class="pdv-container">
+        <div class="pdv-menu">
+            <h3 style="color:var(--gold); margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-bolt"></i> LANÇAMENTO RÁPIDO
+            </h3>
+            <div id="categorias-pdv" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:15px; scrollbar-width:none;"></div>
+            <div id="grid-atalhos" class="grid-atalhos" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; max-height:250px; overflow-y:auto;"></div>
+        </div>
+
+        <div class="pdv-checkout">
+            <div class="card-cliente">
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <input type="text" id="pdv-nome" placeholder="Nome do Cliente" class="pdv-input" style="flex:1; margin-bottom:0;">
+                    <button onclick="abrirListaClientes()" title="Agenda de Clientes" style="background:var(--gold); color:black; border:none; border-radius:8px; width:45px; cursor:pointer;">
+                        <i class="fas fa-address-book"></i>
                     </button>
                 </div>
+
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <input type="tel" id="pdv-tel" placeholder="WhatsApp (DDD)" class="pdv-input" style="flex:1; margin-bottom:0;">
+                    <button onclick="salvarClienteBase()" title="Salvar Cliente" style="background:#28a745; color:white; border:none; border-radius:8px; width:45px; cursor:pointer;">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <select id="pdv-pagamento" class="pdv-input" style="flex:1; border:1px solid var(--gold); color:var(--gold); font-weight:bold; background:#000;">
+                        <option value="Dinheiro"> DINHEIRO</option>
+                        <option value="PIX"> PIX</option>
+                        <option value="Cartão"> CARTÃO</option>
+                    </select>
+                    <select id="pdv-tipo" class="pdv-input" style="flex:1;" onchange="ajustarCamposEndereco()">
+                        <option value="DELIVERY">🛵 DELIVERY</option>
+                        <option value="RETIRADA">🥡 RETIRADA</option>
+                    </select>
+                </div>
+
+                <div id="container-endereco-pdv">
+                    <select id="pdv-end" class="pdv-input" style="width:100%; margin-bottom:10px;" onchange="atualizarListaPDV()">
+                        <option value="">-- SELECIONE O BAIRRO --</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Coqueiral">Coqueiral</option>
+                        <option value="Vila Emanuela">Vila Emanuela</option>
+                        <option value="Célio Braz">Célio Braz</option>
+                        <option value="Vila Samuel">Vila Samuel</option>
+                        <option value="Jadim Planalto">Jardim Planalto</option>
+                        <option value="Parq. Primavera">Parq. Primavera</option>
+                        <option value="São Sebastião">São Sebastião</option>
+                        <option value="Paraiso">Paraiso</option>
+                        <option value="São João">São João</option>
+                        <option value="Vila Jamily">Vila Jamily</option>
+                        <option value="Itinga-PA">Itinga-PA</option>
+                        <option value="Paulistão">Paulistão</option>
+                    </select>
+                    <input type="text" id="pdv-rua" placeholder="Rua e Número" class="pdv-input" style="width:82%; margin-bottom:10px;">
+                </div>
+
+                <textarea id="pdv-obs" placeholder="Observações..." class="pdv-input" style="height:60px; padding:10px; resize:none; font-size:0.85rem;"></textarea>
+            </div>
+
+            <div id="pdv-lista-itens" class="pdv-lista" style="background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:15px; max-height: 180px; overflow-y: auto;">
+                <p style="text-align:center; color:#444; margin-top:30px;">Carrinho vazio</p>
+            </div>
+
+            <div class="pdv-total-section" style="border-top:2px solid #333; padding-top:15px;">
+                <div id="pdv-taxa-info" style="display:flex; justify-content:space-between; font-size:0.9rem; color:var(--gold); margin-bottom:5px; display:none;">
+                    <span>TAXA DE ENTREGA:</span>
+                    <span id="pdv-taxa-valor">R$ 0,00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.6rem; font-weight:900; margin-bottom:15px;">
+                    <span>TOTAL:</span>
+                    <span id="pdv-total-valor" style="color:var(--gold);">R$ 0,00</span>
+                </div>
+                <button onclick="confirmarPedidoPDV()" class="btn-finalizar-pdv" style="width:100%; padding:18px; font-size:1.1rem; font-weight:bold; border-radius:12px; cursor:pointer;">
+                    LANÇAR PEDIDO <i class="fas fa-paper-plane" style="margin-left:8px;"></i>
+                </button>
             </div>
         </div>
-    </section>
-
+    </div>
+</section>
     <!-- ABA: PEDIDOS -->
     <section id="tab-pedidos" class="tab-content">
         <div id="lista-pedidos" class="grid-pedidos"></div>
@@ -997,6 +1023,7 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
 
     // ===== REALTIME: PEDIDOS =====
     onSnapshot(query(collection(db,"pedidos"), orderBy("data","desc")), (snap) => {
+        window.__ultimoSnap = snap; 
         const lista = document.getElementById('lista-pedidos');
         let pix=0, card=0, din=0;
         lista.innerHTML = "";
@@ -1027,6 +1054,11 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
                 <button class="btn-excluir-pedido" onclick="deletarPedidoDireto('${id}')"
                     style="position:absolute; top:18px; right:110px; background:rgba(255,255,255,0.1); border:none; color:#ff4d4d; border-radius:8px; width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;">
                     <i class="fas fa-trash"></i>
+                </button>
+                <button onclick="reimprimirPedido('${id}')"
+                    style="position:absolute; top:18px; right:70px; background:rgba(255,255,255,0.1); border:none; color:#1565c0; border-radius:8px; width:30px; height:30px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;"
+                    title="Reimprimir pedido">
+                    <i class="fas fa-print"></i>
                 </button>
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <div>
@@ -1104,6 +1136,51 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
         carregado = true;
     });
 
+    // reimprimir
+   
+    window.reimprimirPedido = (id) => {
+    const snap = window.__ultimoSnap;
+    if (!snap) return;
+
+    const docSnap = snap.docs.find(d => d.id === id);
+    if (!docSnap) return;
+
+    const p = docSnap.data();
+    const val = parseFloat(p.totalFinal || p.total || 0);
+    const isRetirada = p.tipoPedido === "RETIRADA" || p.end === "RETIRADA NO LOCAL";
+    const isMesa = p.end === 'Consumo Local';
+
+    const linhaItens = (p.itens || []).map(i =>
+        `<div class="nota-item"><span>${i.q || 1}x ${i.n}</span></div>
+         ${i.obs ? `<div style="font-size:11px; padding-left:10px; color:#555;">Obs: ${i.obs}</div>` : ''}`
+    ).join('');
+
+    const nota = document.getElementById('nota-impressao-mesa');
+    nota.innerHTML = `
+        <div style="text-align:center; font-weight:bold; font-size:15px;">CHAPPARQUENTE</div>
+        <div style="text-align:center; font-size:11px; margin-bottom:4px;">Via de reimpressão</div>
+        <div class="nota-linha"></div>
+        <div class="nota-item"><span><b>Cliente:</b></span><span>${p.nome || '-'}</span></div>
+        <div class="nota-item"><span><b>Tipo:</b></span><span>${isMesa ? 'Mesa' : isRetirada ? 'Retirada' : 'Delivery'}</span></div>
+        <div class="nota-item"><span><b>Endereço:</b></span><span>${p.end || '-'}</span></div>
+        ${p.garcom ? `<div class="nota-item"><span><b>Atendente:</b></span><span>${p.garcom}</span></div>` : ''}
+        <div class="nota-linha"></div>
+        <b style="font-size:12px;">ITENS:</b><br>
+        ${linhaItens}
+        <div class="nota-linha"></div>
+        <div class="nota-item"><b>TOTAL:</b><b>R$ ${val.toFixed(2)}</b></div>
+        ${p.pagamento ? `<div class="nota-item"><span>Pagamento:</span><span>${p.pagamento}</span></div>` : ''}
+        <div class="nota-linha"></div>
+        <div style="text-align:center; font-size:10px; margin-top:6px;">
+            ${new Date().toLocaleString('pt-BR')}
+        </div>
+    `;
+    nota.style.display = 'block';
+    setTimeout(() => {
+        window.print();
+        nota.style.display = 'none';
+    }, 200);
+};
     // ===== DELETAR PEDIDO =====
     window.deletarPedidoDireto = async (id) => {
         const autorizado = await validarSenha();
@@ -1350,56 +1427,151 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
 
     window.removerDoPDV = (index) => { carrinhoPDV.splice(index,1); window.atualizarListaPDV(); };
 
-    window.confirmarPedidoPDV = async () => {
-        const nome     = document.getElementById('pdv-nome').value.trim();
-        const tel      = document.getElementById('pdv-tel').value.trim();
-        const end      = document.getElementById('pdv-end').value.trim();
-        const obs      = document.getElementById('pdv-obs').value.trim();
-        const tipo     = document.getElementById('pdv-tipo').value;
-        const pagamento = document.getElementById('pdv-pagamento').value;
-        if (carrinhoPDV.length === 0 || !nome) return Swal.fire('Atenção','Adicione itens e o nome do cliente!','warning');
-        try {
-            const totalFinal = carrinhoPDV.reduce((acc,i) => acc+i.p, 0);
-            await addDoc(collection(db,"pedidos"), {
-                nome:nome.toUpperCase(), telefone:tel, tipo:"SITE", tipoPedido:tipo,
-                itens:carrinhoPDV, totalFinal, status:"recebido", data:serverTimestamp(),
-                end: end || (tipo==="BALCAO" ? "Consumo Local" : "Retirada"),
-                obs, pagamento
-            });
-            carrinhoPDV = [];
-            document.getElementById('pdv-nome').value = "";
-            document.getElementById('pdv-tel').value  = "";
-            document.getElementById('pdv-end').value  = "";
-            document.getElementById('pdv-obs').value  = "";
-            window.atualizarListaPDV();
-            Swal.fire({ title:'Pedido Lançado!', icon:'success', timer:1500, showConfirmButton:false });
-        } catch(e) { Swal.fire('Erro','Falha ao salvar no banco de dados.','error'); }
-    };
+    // 1. FUNÇÃO PARA MOSTRAR/ESCONDER CAMPOS DE ENDEREÇO
+window.ajustarCamposEndereco = () => {
+    const tipo = document.getElementById('pdv-tipo')?.value;
+    const container = document.getElementById('container-endereco-pdv');
+    const taxaInfo = document.getElementById('pdv-taxa-info');
+    
+    if (!container) return;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.item-menu-gaveta').forEach(btn => btn.classList.remove('active'));
-        const abaPedidos = document.getElementById('tab-pedidos');
-        const btnPedidos = document.querySelector('[onclick*="tab-pedidos"]');
-        if (abaPedidos) abaPedidos.classList.add('active');
-        if (btnPedidos) btnPedidos.classList.add('active');
-        setTimeout(() => { if (typeof window.renderAtalhosPDV === 'function') window.renderAtalhosPDV(); }, 1000);
-        const campoBuscaPDV = document.getElementById('busca-pdv');
-        if (campoBuscaPDV) campoBuscaPDV.addEventListener('input', (e) => { window.renderAtalhosPDV(e.target.value); });
-    });
-
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-        setTimeout(window.renderAtalhosPDV, 500);
+    if (tipo === 'DELIVERY') {
+        container.style.display = 'block';
+        if (taxaInfo) taxaInfo.style.display = 'flex';
+    } else {
+        container.style.display = 'none';
+        if (taxaInfo) taxaInfo.style.display = 'none';
+        const selectBairro = document.getElementById('pdv-end');
+        if (selectBairro) selectBairro.value = ""; 
     }
-    window.renderAtalhosPDV();
+    window.atualizarListaPDV();
+};
 
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && (e.key==='u'||e.key==='U')) e.preventDefault();
-        if (e.key==='F12') e.preventDefault();
-        if (e.ctrlKey && e.shiftKey && e.key==='I') e.preventDefault();
-    });
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+// 2. ATUALIZAR LISTA DO CARRINHO E CALCULAR TAXA AUTOMÁTICA
+window.atualizarListaPDV = () => {
+    const lista = document.getElementById('pdv-lista-itens');
+    const totalEl = document.getElementById('pdv-total-valor');
+    const taxaEl = document.getElementById('pdv-taxa-valor');
+    
+    const bairroSel = document.getElementById('pdv-end')?.value || "";
+    const tipoPedido = document.getElementById('pdv-tipo')?.value || "DELIVERY";
 
+    if (!lista || !totalEl) return;
+
+    if (carrinhoPDV.length === 0) {
+        lista.innerHTML = '<p style="text-align:center; color:#444; margin-top:30px;">Carrinho vazio</p>';
+        totalEl.innerText = "R$ 0,00";
+        if (taxaEl) taxaEl.innerText = "R$ 0,00";
+        return;
+    }
+
+    // Renderiza os itens no carrinho
+    lista.innerHTML = carrinhoPDV.map((item, index) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #222; background:#111; margin-bottom:5px; border-radius:5px;">
+            <div style="flex:1;"><b style="color:white; font-size:0.9rem;">${item.n}</b><br><small style="color:var(--gold);">R$ ${item.p.toFixed(2)}</small></div>
+            <i class="fas fa-trash" onclick="removerDoPDV(${index})" style="color:#ff4d4d; cursor:pointer; padding:10px;"></i>
+        </div>`).join('');
+
+    // --- LÓGICA DAS TAXAS ---
+    let subtotal = carrinhoPDV.reduce((acc, i) => acc + i.p, 0);
+    let taxa = 0;
+
+    if (tipoPedido === 'DELIVERY') {
+        if (bairroSel === "Paulistão") {
+            taxa = 8.00;
+        } else if (bairroSel === "Itinga-PA") {
+            taxa = 4.00;
+        } else if (bairroSel !== "") {
+            taxa = 3.00; // Taxa padrão para os outros bairros
+        }
+    }
+
+    if (taxaEl) taxaEl.innerText = `R$ ${taxa.toFixed(2)}`;
+    totalEl.innerText = `R$ ${(subtotal + taxa).toFixed(2)}`;
+};
+
+// 3. CONFIRMAR E SALVAR NO FIREBASE
+window.confirmarPedidoPDV = async () => {
+    const nome = document.getElementById('pdv-nome').value.trim();
+    const tel = document.getElementById('pdv-tel').value.trim();
+    const bairro = document.getElementById('pdv-end').value;
+    const rua = document.getElementById('pdv-rua').value.trim();
+    const tipo = document.getElementById('pdv-tipo').value;
+    const pag = document.getElementById('pdv-pagamento').value;
+    const obs = document.getElementById('pdv-obs').value;
+
+    if (carrinhoPDV.length === 0 || !nome) {
+        return Swal.fire('Atenção', 'Adicione itens e o nome do cliente!', 'warning');
+    }
+
+    if (tipo === 'DELIVERY' && !bairro) {
+        return Swal.fire('Atenção', 'Selecione o bairro para a entrega!', 'warning');
+    }
+
+    let subtotal = carrinhoPDV.reduce((acc, i) => acc + i.p, 0);
+    let taxa = (tipo === 'DELIVERY') ? (bairro === "Paulistão" ? 8 : (bairro === "Itinga-PA" ? 4 : 3)) : 0;
+
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            nome: nome.toUpperCase(),
+            telefone: tel,
+            tipo: "SITE",
+            tipoPedido: tipo,
+            itens: carrinhoPDV,
+            subtotal: subtotal,
+            taxaEntrega: taxa,
+            totalFinal: subtotal + taxa,
+            status: "recebido",
+            data: serverTimestamp(),
+            end: tipo === 'DELIVERY' ? `BAIRRO: ${bairro}${rua ? ' - RUA: ' + rua : ''}` : tipo,
+            obs,
+            pagamento: pag
+        });
+
+        // Limpeza
+        carrinhoPDV = [];
+        document.getElementById('pdv-nome').value = "";
+        document.getElementById('pdv-end').value = "";
+        document.getElementById('pdv-rua').value = "";
+        document.getElementById('pdv-obs').value = "";
+        
+        window.atualizarListaPDV();
+        Swal.fire({ title: 'Pedido Lançado!', icon: 'success', timer: 1500, showConfirmButton: false });
+
+    } catch (e) {
+        console.error(e);
+        Swal.fire('Erro', 'Falha ao salvar no banco de dados.', 'error');
+    }
+};
+
+// 4. INICIALIZAÇÃO AO CARREGAR A PÁGINA
+document.addEventListener('DOMContentLoaded', () => {
+  
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.item-menu-gaveta').forEach(btn => btn.classList.remove('active'));
+
+    // 2. DEFINE A PÁGINA DE PEDIDOS COMO PRINCIPAL
+    const abaPedidos = document.getElementById('tab-pedidos');
+    const btnPedidos = document.querySelector('[onclick*="tab-pedidos"]');
+
+    if (abaPedidos) {
+        abaPedidos.classList.add('active');
+    }
+    if (btnPedidos) {
+        btnPedidos.classList.add('active');
+    }
+
+    // 3. CARREGA OS ATALHOS DO PDV EM SEGUNDO PLANO
+    setTimeout(() => {
+        if (typeof window.renderAtalhosPDV === 'function') {
+            window.renderAtalhosPDV();
+        }
+        // Garante que os campos de endereço do PDV iniciem configurados
+        if (typeof window.ajustarCamposEndereco === 'function') {
+            window.ajustarCamposEndereco();
+        }
+    }, 500);
+});
 </script>
 
 <!-- ===== SENHA ADMIN ===== -->
