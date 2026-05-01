@@ -891,7 +891,7 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
     window.abrirMesa = async (n) => {
         const { value: garcom } = await Swal.fire({
             title: `ABRIR MESA ${n}`, input:'radio',
-            inputOptions: { 'Thayná':'Thayná','Fernando':'Fernando','Gabrielle':'Gabrielle' },
+            inputOptions: { 'Lyanna':'Lyanna','Fernando':'Fernando','Leona':'Leona' },
             inputValidator: (v) => { if (!v) return 'Você precisa selecionar um garçom!'; },
             confirmButtonText:'ABRIR MESA', background:'#fff', color:'#0d0d0d',
             confirmButtonColor:'#da8300',
