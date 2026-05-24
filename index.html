@@ -693,6 +693,8 @@ window.navegarParaAba = async (elemento, idAba) => {
             { id:72, n:"Escurato",p:5.00  },
             { id:69, n:"Salgados Médio",p:4.00  },
             { id:71, n:"Salgados Grande",p:5.00  },
+            { id:74, n:"Bolacha Wafer",p:6.00  },
+            { id:75, n:"Bolacha pequena",p:4.00  },
         ]
     };
 
@@ -871,6 +873,15 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
         }
     };
 
+    function formatarDataHora(timestamp) {
+    if (!timestamp) return '';
+    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const dia  = String(d.getDate()).padStart(2,'0');
+    const mes  = String(d.getMonth()+1).padStart(2,'0');
+    const hora = String(d.getHours()).padStart(2,'0');
+    const min  = String(d.getMinutes()).padStart(2,'0');
+    return `${dia}/${mes} às ${hora}:${min}`;
+}
     function renderMenu() {
         const container = document.getElementById('sanfona-menu');
         if (!container) return;
@@ -1117,7 +1128,12 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
                 </div>
                 <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:800; font-size:1.2rem; color:white;">R$ ${val.toFixed(2)}</span>
-                    <span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:5px;">${p.pagamento || 'Pendente'}</span>
+                   <span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:5px;">${p.pagamento || 'Pendente'}</span>
+</div>
+<div style="margin-top:8px; display:flex; align-items:center; gap:6px; color:#aaa; font-size:0.85rem;">
+    <i class="fas fa-clock" style="color:var(--gold); font-size:0.7rem;"></i>
+    <span>${formatarDataHora(p.data)}</span>
+</div>
                 </div>
                 ${p.pagamento === "Dinheiro" && valorPago > 0 ? `
                     <div style="margin-top:12px; padding:10px; background:rgba(255,189,89,0.15); border:1px dashed var(--gold); border-radius:10px; font-size:0.85rem; color:var(--gold);">
