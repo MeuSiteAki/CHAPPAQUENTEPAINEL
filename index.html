@@ -295,6 +295,7 @@
             CHAPPA<span style="color:var(--gold);">QUENTE</span> <small style="font-size:0.6rem; opacity:0.5;">ADM</small>
         </div>
     </div>
+    
     <div style="text-align:right;">
         <div id="relogio-topo" style="color:var(--gold); font-weight:bold; font-family:monospace; font-size:1.1rem; line-height:1;">00:00:00</div>
         <div id="data-topo" style="font-size:0.7rem; color:#888; text-transform:uppercase; margin-top:2px;">--/--/----</div>
@@ -320,6 +321,11 @@
         <div class="item-menu-gaveta" onclick="navegarParaAba(this,'tab-balanco')" style="padding:15px; color:white; display:flex; align-items:center; gap:15px; cursor:pointer; border-radius:8px; transition:0.3s; margin-bottom:5px;">
             <i class="fas fa-wallet" style="width:20px; color:var(--gold);"></i> <b>Caixa</b>
         </div>
+        <button id="btn-toggle-loja" onclick="toggleLoja()"
+    style="background:#2e7d32; color:white; border:none; padding:10px 16px;
+    border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.85rem; white-space:nowrap;">
+    🟢 ABERTO
+</button>
         <!-- <div class="item-menu-gaveta" onclick="navegarParaAba(this,'tab-estoque')" style="padding:15px; color:white; display:flex; align-items:center; gap:15px; cursor:pointer; border-radius:8px; transition:0.3s; margin-bottom:5px;">
             <i class="fas fa-boxes" style="width:20px; color:var(--gold);"></i> <b>Estoque</b>
         </div> -->
@@ -380,32 +386,47 @@ window.navegarParaAba = async (elemento, idAba) => {
 <main>
 
     <!-- ABA: LANÇAMENTO RÁPIDO (PDV/WhatsApp) -->
-   <section id="tab-pdv" class="tab-content active">
+  <section id="tab-pdv" class="tab-content active">
     <div class="pdv-container">
         <div class="pdv-menu">
             <h3 style="color:var(--gold); margin-bottom:15px; display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-bolt"></i> LANÇAMENTO RÁPIDO
             </h3>
             <div id="categorias-pdv" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:15px; scrollbar-width:none;"></div>
-            <div id="grid-atalhos" class="grid-atalhos" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; max-height:250px; overflow-y:auto;"></div>
+            <div id="grid-atalhos" class="grid-atalhos" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; max-height:calc(100vh - 280px); overflow-y:auto;"></div>
         </div>
 
         <div class="pdv-checkout">
             <div class="card-cliente">
-                <div style="display:flex; gap:8px; margin-bottom:10px;">
-                    <input type="text" id="pdv-nome" placeholder="Nome do Cliente" class="pdv-input" style="flex:1; margin-bottom:0;">
-                    <button onclick="abrirListaClientes()" title="Agenda de Clientes" style="background:var(--gold); color:black; border:none; border-radius:8px; width:45px; cursor:pointer;">
+
+                <!-- NOME + AUTOCOMPLETE -->
+                <div style="display:flex; gap:8px; margin-bottom:10px; position:relative;">
+                    <input type="text" id="pdv-nome" placeholder="Nome do Cliente" class="pdv-input"
+                        style="flex:1; margin-bottom:0;"
+                        oninput="buscarClienteAutoComplete(this.value)"
+                        autocomplete="off">
+                    <button onclick="abrirListaClientes()" title="Agenda de Clientes"
+                        style="background:var(--gold); color:black; border:none; border-radius:8px; width:45px; cursor:pointer;">
                         <i class="fas fa-address-book"></i>
                     </button>
+                    <div id="autocomplete-lista" style="
+                        display:none; position:absolute; top:100%; left:0; right:50px; z-index:9999;
+                        background:#1a1a1a; border:1px solid var(--gold); border-radius:0 0 10px 10px;
+                        max-height:220px; overflow-y:auto; box-shadow:0 8px 20px rgba(0,0,0,0.9);">
+                    </div>
                 </div>
 
+                <!-- TELEFONE + Nº CASA + SALVAR -->
                 <div style="display:flex; gap:8px; margin-bottom:10px;">
                     <input type="tel" id="pdv-tel" placeholder="WhatsApp (DDD)" class="pdv-input" style="flex:1; margin-bottom:0;">
-                    <button onclick="salvarClienteBase()" title="Salvar Cliente" style="background:#28a745; color:white; border:none; border-radius:8px; width:45px; cursor:pointer;">
+                    <input type="text" id="pdv-numero-casa" placeholder="Nº Casa" class="pdv-input" style="width:90px; margin-bottom:0;">
+                    <button onclick="salvarClienteBase()" title="Salvar Cliente"
+                        style="background:#28a745; color:white; border:none; border-radius:8px; width:45px; cursor:pointer;">
                         <i class="fas fa-save"></i>
                     </button>
                 </div>
 
+                <!-- PAGAMENTO + TIPO -->
                 <div style="display:flex; gap:8px; margin-bottom:10px;">
                     <select id="pdv-pagamento" class="pdv-input" style="flex:1; border:1px solid var(--gold); color:var(--gold); font-weight:bold; background:#000;">
                         <option value="Dinheiro"> DINHEIRO</option>
@@ -418,6 +439,7 @@ window.navegarParaAba = async (elemento, idAba) => {
                     </select>
                 </div>
 
+                <!-- ENDEREÇO -->
                 <div id="container-endereco-pdv">
                     <select id="pdv-end" class="pdv-input" style="width:100%; margin-bottom:10px;" onchange="atualizarListaPDV()">
                         <option value="">-- SELECIONE O BAIRRO --</option>
@@ -435,13 +457,13 @@ window.navegarParaAba = async (elemento, idAba) => {
                         <option value="Itinga-PA">Itinga-PA</option>
                         <option value="Paulistão">Paulistão</option>
                     </select>
-                    <input type="text" id="pdv-rua" placeholder="Rua e Número" class="pdv-input" style="width:82%; margin-bottom:10px;">
+                    <input type="text" id="pdv-rua" placeholder="Rua e Número" class="pdv-input" style="width:100%; margin-bottom:10px;">
                 </div>
 
-                <textarea id="pdv-obs" placeholder="Observações..." class="pdv-input" style="height:60px; padding:10px; resize:none; font-size:0.85rem;"></textarea>
+                <textarea id="pdv-obs" placeholder="Observações..." class="pdv-input" style="height:50px; padding:10px; resize:none; font-size:0.85rem;"></textarea>
             </div>
 
-            <div id="pdv-lista-itens" class="pdv-lista" style="background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:15px; max-height: 180px; overflow-y: auto;">
+            <div id="pdv-lista-itens" class="pdv-lista" style="background:rgba(0,0,0,0.2); border-radius:8px; margin-bottom:15px; max-height:180px; overflow-y:auto;">
                 <p style="text-align:center; color:#444; margin-top:30px;">Carrinho vazio</p>
             </div>
 
@@ -589,10 +611,10 @@ window.navegarParaAba = async (elemento, idAba) => {
 <!-- ===== FIREBASE (MODULE) ===== -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-        getFirestore, collection, addDoc, getDocs, deleteDoc,
-        doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { 
+    getFirestore, collection, addDoc, getDocs, deleteDoc, 
+    doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDUhKpLopIApQaiEoGaxBXjZzmkROvdaJI",
@@ -606,6 +628,26 @@ window.navegarParaAba = async (elemento, idAba) => {
 
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
+
+    // --- CONTROLE DA LOJA ---
+const refLoja = doc(db, "config", "loja");
+
+// Cria o documento se não existir
+setDoc(refLoja, { aberta: true }, { merge: true });
+
+onSnapshot(refLoja, (snap) => {
+    const aberta = snap.data()?.aberta ?? true;
+    const btn = document.getElementById('btn-toggle-loja');
+    if (!btn) return;
+    btn.innerText = aberta ? '🟢 ABERTA' : '🔴 FECHADA';
+    btn.style.background = aberta ? '#2e7d32' : '#c62828';
+});
+
+window.toggleLoja = async () => {
+    const snap = await getDoc(refLoja);
+    const atual = snap.data()?.aberta ?? true;
+    await updateDoc(refLoja, { aberta: !atual });
+};
 
     window.__firestoreDB      = db;
     window.__firestoreExports = { onSnapshot, collection, query, orderBy };
@@ -1264,86 +1306,217 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
     let carrinhoPDV = [];
 
     window.salvarClienteBase = async () => {
-        const nome = document.getElementById('pdv-nome').value.trim();
-        const tel  = document.getElementById('pdv-tel').value.trim();
-        const end  = document.getElementById('pdv-end').value.trim();
-        if (!nome || !tel) return Swal.fire('Erro','Nome e Telefone são obrigatórios para salvar','error');
-        try {
-            await addDoc(collection(db,"clientes"), { nome:nome.toUpperCase(), telefone:tel, endereco:end, dataCadastro:serverTimestamp() });
-            Swal.fire('Sucesso','Cliente salvo na agenda!','success');
-        } catch(e) { console.error(e); }
-    };
+    const nome = document.getElementById('pdv-nome').value.trim();
+    const tel  = document.getElementById('pdv-tel').value.trim();
+    const end  = document.getElementById('pdv-end').value.trim();
+    const numeroCasa = document.getElementById('pdv-numero-casa')?.value.trim() || '';
 
-    window.abrirListaClientes = async () => {
-        Swal.fire({
-            title:'<i class="fas fa-address-book" style="color:var(--gold);"></i> AGENDA DE CLIENTES',
-            html:`
-                <input type="text" id="busca-cliente-agenda" placeholder="Buscar por nome..."
-                    style="width:100%; padding:10px; margin-bottom:15px; background:#222; border:1px solid #444; color:white; border-radius:8px;">
-                <div style="max-height:400px; overflow-y:auto;">
-                    <table style="width:100%; color:white; font-size:0.9rem; text-align:left; border-collapse:collapse;">
-                        <thead><tr style="color:var(--gold); border-bottom:2px solid #333;">
-                            <th style="padding:10px;">CLIENTE</th>
-                            <th style="text-align:right; padding-right:15px;">AÇÃO</th>
-                        </tr></thead>
-                        <tbody id="lista-clientes-corpo">
-                            <tr><td colspan="2" style="text-align:center; padding:20px;">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>`,
-            showConfirmButton:false, background:'#1a1a1a', width:'500px',
-            didOpen: () => {
-                renderizarTabelaClientes("");
-                document.getElementById('busca-cliente-agenda').addEventListener('input', (e) => { renderizarTabelaClientes(e.target.value); });
-            }
-        });
-    };
+    if (!nome || !tel) return Swal.fire('Erro','Nome e Telefone são obrigatórios para salvar','error');
 
-    async function renderizarTabelaClientes(filtro="") {
-        const corpoTabela = document.getElementById('lista-clientes-corpo');
-        const querySnapshot = await getDocs(collection(db,"clientes"));
-        let html = ""; const busca = filtro.toLowerCase();
-        querySnapshot.forEach((docSnap) => {
-            const c = docSnap.data(); const id = docSnap.id;
-            const nome = c.nome||"", tel = c.telefone||"", end = c.endereco||"";
-            if (nome.toLowerCase().includes(busca)) {
-                html += `<tr style="border-bottom:1px solid #222;">
-                    <td onclick="selecionarCliente('${nome}','${tel}','${end}')" style="padding:12px; cursor:pointer;">
-                        <div style="font-weight:bold; color:white;">${nome.toUpperCase()}</div>
-                        <div style="font-size:0.75rem; color:#888;">${tel}</div>
-                    </td>
-                    <td style="text-align:right; padding-right:10px;">
-                        <button onclick="deletarCliente('${id}','${nome}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:1.1rem; padding:10px;">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>`;
-            }
+    // Pergunta os favoritos
+    const cardapioRef = window.__cardapio;
+    let opcoesHtml = '<div style="max-height:350px; overflow-y:auto;">';
+    for (const cat in cardapioRef) {
+        opcoesHtml += `<div style="color:var(--gold); font-weight:bold; font-size:0.75rem; text-transform:uppercase; padding:10px 5px 5px;">${cat}</div>`;
+        cardapioRef[cat].forEach(item => {
+            opcoesHtml += `
+                <label style="display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; cursor:pointer; border-bottom:1px solid #222; transition:0.2s;"
+                    onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='none'">
+                    <input type="checkbox" class="fav-check" data-nome="${item.n}" data-preco="${item.p}" 
+                        style="width:18px; height:18px; accent-color:var(--gold); cursor:pointer;">
+                    <span style="color:white; font-size:0.85rem; flex:1;">${item.n}</span>
+                    <span style="color:var(--gold); font-size:0.8rem; font-weight:bold;">R$ ${item.p.toFixed(2)}</span>
+                </label>`;
         });
-        corpoTabela.innerHTML = html || '<tr><td colspan="2" style="text-align:center; padding:20px; color:#666;">Nenhum cliente encontrado.</td></tr>';
+    }
+    opcoesHtml += '</div>';
+
+    const { isConfirmed } = await Swal.fire({
+        title: `<i class="fas fa-star" style="color:var(--gold);"></i> FAVORITOS DE ${nome.toUpperCase()}`,
+        html: `<p style="color:#888; font-size:0.8rem; margin-bottom:10px;">Marque o que esse cliente mais pede:</p>${opcoesHtml}`,
+        showCancelButton: true,
+        confirmButtonText: 'SALVAR CLIENTE',
+        cancelButtonText: 'Pular favoritos',
+        confirmButtonColor: '#28a745',
+        background: '#0d0d0d',
+        color: '#fff',
+        width: '520px'
+    });
+
+    const favoritos = [];
+    document.querySelectorAll('.fav-check:checked').forEach(cb => {
+        favoritos.push({ n: cb.dataset.nome, p: parseFloat(cb.dataset.preco) });
+    });
+
+    try {
+       await addDoc(collection(window.__firestoreDB, "clientes"), {
+    nome: nome.toUpperCase(),
+    telefone: tel,
+    numeroCasa: numeroCasa,
+    endereco: end,
+    rua: document.getElementById('pdv-rua')?.value.trim() || '',
+    favoritos: favoritos,
+    dataCadastro: serverTimestamp()
+});
+        Swal.fire({ title:'Cliente salvo!', icon:'success', timer:1500, showConfirmButton:false });
+    } catch(e) { console.error(e); Swal.fire('Erro','Falha ao salvar cliente.','error'); }
+};
+
+window.buscarClienteAutoComplete = async (valor) => {
+    const lista = document.getElementById('autocomplete-lista');
+    if (!lista) return;
+    if (!valor || valor.length < 2) { lista.style.display = 'none'; return; }
+
+    const busca = valor.toUpperCase();
+    try {
+        const snap = await getDocs(collection(window.__firestoreDB, "clientes"));
+        const resultados = [];
+        snap.forEach(d => {
+            const c = d.data();
+            if ((c.nome || '').includes(busca)) resultados.push({ ...c, id: d.id });
+        });
+
+        if (!resultados.length) { lista.style.display = 'none'; return; }
+
+        lista.innerHTML = resultados.map(c => {
+            const favEnc = encodeURIComponent(JSON.stringify(c.favoritos || []));
+            const rua    = encodeURIComponent(c.rua || '');
+            return `
+            <div onclick="selecionarCliente('${c.nome}','${c.telefone || ''}','${c.endereco || ''}','${c.numeroCasa || ''}','${rua}','${favEnc}')"
+                style="padding:12px 15px; cursor:pointer; border-bottom:1px solid #222; transition:0.2s; display:flex; flex-direction:column; gap:3px;"
+                onmouseover="this.style.background='#2a2a2a'" onmouseout="this.style.background='none'">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-user" style="color:var(--gold); font-size:0.75rem;"></i>
+                    <b style="color:white; font-size:0.9rem;">${c.nome}</b>
+                    ${(c.favoritos && c.favoritos.length) ? `<span style="background:var(--gold); color:black; font-size:0.6rem; padding:2px 6px; border-radius:10px; font-weight:bold;">⭐ ${c.favoritos.length} fav</span>` : ''}
+                </div>
+                <div style="color:#888; font-size:0.75rem; padding-left:20px;">
+                    ${c.telefone ? `<i class="fab fa-whatsapp" style="color:#25d366;"></i> ${c.telefone}` : ''}
+                    ${c.numeroCasa ? ` · 🏠 Nº ${c.numeroCasa}` : ''}
+                    ${c.rua ? ` · ${c.rua}` : ''}
+                    ${c.endereco ? ` · ${c.endereco}` : ''}
+                </div>
+            </div>`;
+        }).join('');
+        lista.style.display = 'block';
+    } catch(e) { console.error(e); }
+};
+
+// Fecha autocomplete ao clicar fora
+document.addEventListener('click', (e) => {
+    const lista = document.getElementById('autocomplete-lista');
+    if (lista && !lista.contains(e.target) && e.target.id !== 'pdv-nome') {
+        lista.style.display = 'none';
+    }
+});
+
+window.selecionarCliente = (nome, tel, end, numeroCasa, rua, favoritosEncoded) => {
+    document.getElementById('pdv-nome').value = nome;
+    document.getElementById('pdv-tel').value  = tel;
+    if (end && end !== "undefined") document.getElementById('pdv-end').value = end;
+    if (document.getElementById('pdv-numero-casa')) {
+        document.getElementById('pdv-numero-casa').value = (numeroCasa && numeroCasa !== "undefined") ? numeroCasa : '';
+    }
+    if (document.getElementById('pdv-rua')) {
+        document.getElementById('pdv-rua').value = (rua && rua !== "undefined") ? decodeURIComponent(rua) : '';
     }
 
-    window.selecionarCliente = (nome, tel, end) => {
-        document.getElementById('pdv-nome').value = nome;
-        document.getElementById('pdv-tel').value  = tel;
-        document.getElementById('pdv-end').value  = (end === "undefined" || !end) ? "" : end;
-        Swal.close();
-    };
+    const lista = document.getElementById('autocomplete-lista');
+    if (lista) lista.style.display = 'none';
 
-    window.deletarCliente = async (id, nome) => {
-        const result = await Swal.fire({
-            title:'Apagar cliente?', text:`Deseja remover ${nome} da sua lista?`, icon:'warning',
-            showCancelButton:true, confirmButtonColor:'#d33', cancelButtonColor:'#333',
-            confirmButtonText:'Sim, apagar!', cancelButtonText:'Cancelar', background:'#1a1a1a', color:'#fff'
-        });
-        if (result.isConfirmed) {
-            try {
-                await deleteDoc(doc(db,"clientes",id));
-                Swal.fire({ title:'Removido!', icon:'success', timer:800, showConfirmButton:false });
-                renderizarTabelaClientes(document.getElementById('busca-cliente-agenda').value);
-            } catch(e) { Swal.fire('Erro','Não foi possível excluir.','error'); }
+    try {
+        const favoritos = JSON.parse(decodeURIComponent(favoritosEncoded || '[]'));
+        if (favoritos && favoritos.length > 0) {
+            carrinhoPDV = [...favoritos.map(f => ({ n: f.n, p: f.p, q: 1 }))];
+            window.atualizarListaPDV();
+            Swal.fire({
+                title: `✅ ${nome}`,
+                html: `<div style="color:#888; font-size:0.85rem;">Dados preenchidos!<br><span style="color:var(--gold); font-weight:bold;">${favoritos.length} favorito(s) adicionado(s) ao carrinho.</span></div>`,
+                icon: 'success', timer: 2000, showConfirmButton: false,
+                background: '#0d0d0d', color: '#fff'
+            });
+        } else {
+            Swal.fire({
+                title: `✅ ${nome}`,
+                html: `<div style="color:#888; font-size:0.85rem;">Dados preenchidos!</div>`,
+                icon: 'success', timer: 1500, showConfirmButton: false,
+                background: '#0d0d0d', color: '#fff'
+            });
         }
-    };
+    } catch(e) { console.error('Erro ao carregar favoritos:', e); }
+
+    Swal.close();
+};
+
+window.abrirListaClientes = async () => {
+    Swal.fire({
+        title:'<i class="fas fa-address-book" style="color:var(--gold);"></i> AGENDA DE CLIENTES',
+        html:`
+            <input type="text" id="busca-cliente-agenda" placeholder="Buscar por nome..."
+                style="width:100%; padding:10px; margin-bottom:15px; background:#222; border:1px solid #444; color:white; border-radius:8px;">
+            <div style="max-height:400px; overflow-y:auto;">
+                <table style="width:100%; color:white; font-size:0.9rem; text-align:left; border-collapse:collapse;">
+                    <thead><tr style="color:var(--gold); border-bottom:2px solid #333;">
+                        <th style="padding:10px;">CLIENTE</th>
+                        <th style="text-align:right; padding-right:15px;">AÇÃO</th>
+                    </tr></thead>
+                    <tbody id="lista-clientes-corpo">
+                        <tr><td colspan="2" style="text-align:center; padding:20px;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>`,
+        showConfirmButton:false, background:'#1a1a1a', width:'500px',
+        didOpen: () => {
+            renderizarTabelaClientes("");
+            document.getElementById('busca-cliente-agenda').addEventListener('input', (e) => {
+                renderizarTabelaClientes(e.target.value);
+            });
+        }
+    });
+};
+
+async function renderizarTabelaClientes(filtro="") {
+    const corpoTabela = document.getElementById('lista-clientes-corpo');
+    const querySnapshot = await getDocs(collection(window.__firestoreDB, "clientes"));
+    let html = ""; const busca = filtro.toLowerCase();
+    querySnapshot.forEach((docSnap) => {
+        const c = docSnap.data(); const id = docSnap.id;
+        const nome = c.nome||"", tel = c.telefone||"", end = c.endereco||"";
+        const numeroCasa = c.numeroCasa || "";
+        const favs = c.favoritos || [];
+        const favEncoded = encodeURIComponent(JSON.stringify(favs));
+        if (nome.toLowerCase().includes(busca)) {
+            html += `<tr style="border-bottom:1px solid #222;">
+                <td onclick="selecionarCliente('${nome}','${tel}','${end}','${numeroCasa}','${favEncoded}')" style="padding:12px; cursor:pointer;">
+                    <div style="font-weight:bold; color:white;">${nome.toUpperCase()}</div>
+                    <div style="font-size:0.75rem; color:#888;">${tel} ${numeroCasa ? '· 🏠 Nº '+numeroCasa : ''}</div>
+                    ${favs.length ? `<div style="margin-top:4px;">${favs.map(f => `<span style="background:rgba(223,189,89,0.15); color:var(--gold); font-size:0.65rem; padding:2px 6px; border-radius:6px; margin-right:3px; border:1px solid rgba(223,189,89,0.3);">${f.n}</span>`).join('')}</div>` : ''}
+                </td>
+                <td style="text-align:right; padding-right:10px;">
+                    <button onclick="deletarCliente('${id}','${nome}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:1.1rem; padding:10px;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }
+    });
+    corpoTabela.innerHTML = html || '<tr><td colspan="2" style="text-align:center; padding:20px; color:#666;">Nenhum cliente encontrado.</td></tr>';
+}
+
+window.deletarCliente = async (id, nome) => {
+    const result = await Swal.fire({
+        title:'Apagar cliente?', text:`Deseja remover ${nome} da sua lista?`, icon:'warning',
+        showCancelButton:true, confirmButtonColor:'#d33', cancelButtonColor:'#333',
+        confirmButtonText:'Sim, apagar!', cancelButtonText:'Cancelar', background:'#1a1a1a', color:'#fff'
+    });
+    if (result.isConfirmed) {
+        try {
+            await deleteDoc(doc(window.__firestoreDB, "clientes", id));
+            Swal.fire({ title:'Removido!', icon:'success', timer:800, showConfirmButton:false });
+            renderizarTabelaClientes(document.getElementById('busca-cliente-agenda')?.value || '');
+        } catch(e) { Swal.fire('Erro','Não foi possível excluir.','error'); }
+    }
+};
 
     window.adicionarAoPDV = async (nomeOriginal, precoBase) => {
         const htmlAdicionais = `
@@ -1872,3 +2045,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
