@@ -952,7 +952,7 @@ window.__firestoreExportsFullFn = { addDoc, collection, serverTimestamp };
     window.abrirMesa = async (n) => {
         const { value: garcom } = await Swal.fire({
             title: `ABRIR MESA ${n}`, input:'radio',
-            inputOptions: { 'Lyanna':'Lyanna','Fernando':'Fernando','Leona':'Leona' },
+            inputOptions: { 'Rainara':'Rainara','Fernando':'Fernando','Leona':'Leona' },
             inputValidator: (v) => { if (!v) return 'Você precisa selecionar um garçom!'; },
             confirmButtonText:'ABRIR MESA', background:'#fff', color:'#0d0d0d',
             confirmButtonColor:'#da8300',
@@ -2042,6 +2042,16 @@ document.addEventListener('DOMContentLoaded', () => {
             seta.style.color = "#666";
         }
     };
+
+    // Bloqueios de segurança (mantidos como no original)
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
+    if (e.key === 'F12') { e.preventDefault(); }
+});
+document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
+});
+document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
 </script>
 
 </body>
