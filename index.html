@@ -481,8 +481,24 @@
                 <!-- Box de Faturamento Total -->
                 <div style="background: rgba(255,189,89,0.05); border: 1px solid rgba(255,189,89,0.2); border-radius: 20px; padding: 20px; margin-bottom: 30px; position: relative; overflow: hidden;">
                     <div style="position: absolute; top: -10px; right: -10px; font-size: 5rem; color: rgba(255,189,89,0.03); pointer-events: none;"><i class="fas fa-wallet"></i></div>
-                    <span style="color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Faturamento Global</span>
+                    <span style="color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Faturamento Global (Total)</span>
                     <div style="font-size: 2.8rem; font-weight: 900; color: var(--gold); margin-top: 5px; text-shadow: 0 4px 10px rgba(0,0,0,0.3);" id="b-total">R$ 0,00</div>
+                    
+                    <!-- Linha divisória sutil -->
+                    <div style="margin: 15px 0; border-top: 1px dashed rgba(255,189,89,0.25);"></div>
+                    
+                    <!-- Sub-detalhamento dos valores -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 140px; text-align: left; background: rgba(0,0,0,0.20); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,189,89,0.1);">
+                            <span style="color: #aaa; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 3px;">🍔 Valor dos Itens</span>
+                            <span id="b-total-itens" style="font-size: 1.15rem; font-weight: 800; color: #fff;">R$ 0,00</span>
+                        </div>
+                        <div style="font-weight: bold; color: var(--gold); font-size: 1.2rem; text-align: center;">+</div>
+                        <div style="flex: 1; min-width: 140px; text-align: left; background: rgba(0,0,0,0.20); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255,189,89,0.1);">
+                            <span style="color: #aaa; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 3px;">🛵 Taxas de Entrega</span>
+                            <span id="b-total-entregas" style="font-size: 1.15rem; font-weight: 800; color: #fff;">R$ 0,00</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tabela de Itens Vendidos (Dynamic content) -->
@@ -1019,6 +1035,7 @@
         window.__ultimoSnap = snap; 
         const lista = document.getElementById('lista-pedidos');
         let pix=0, card=0, din=0;
+        let totalItens=0, totalEntregas=0;
         let itemGrouping = {}; // Stores client-side count and total values of non-skipped, completed items for Caixa
 
         if (lista) lista.innerHTML = "";
@@ -1029,9 +1046,24 @@
             if (p.tipo === "COZINHA" || p.tipo === "PARCIAL") return;
 
             const val = parseFloat(p.totalFinal || p.total || p.subtotal || 0);
-            if (p.pagamento === "PIX") pix += val;
-            else if (p.pagamento === "Cartão") card += val;
-            else if (p.pagamento === "Dinheiro") din += val;
+            let contabilizado = false;
+            if (p.pagamento === "PIX") {
+                pix += val;
+                contabilizado = true;
+            } else if (p.pagamento === "Cartão") {
+                card += val;
+                contabilizado = true;
+            } else if (p.pagamento === "Dinheiro") {
+                din += val;
+                contabilizado = true;
+            }
+
+            if (contabilizado) {
+                const taxa = parseFloat(p.taxaEntrega || 0);
+                totalEntregas += taxa;
+                const sub = (p.subtotal !== undefined) ? parseFloat(p.subtotal) : (val - taxa);
+                totalItens += sub;
+            }
 
             // Client-side aggregate of sold items (economia de cota de leitura/escrita do Firebase)
             if (p.itens && Array.isArray(p.itens)) {
@@ -1146,11 +1178,15 @@
         const displayCard = document.getElementById('b-cartao');
         const displayDin = document.getElementById('b-dinheiro');
         const displayTotal = document.getElementById('b-total');
+        const displayTotalItens = document.getElementById('b-total-itens');
+        const displayTotalEntregas = document.getElementById('b-total-entregas');
 
         if (displayPix) displayPix.innerText = `R$ ${pix.toFixed(2)}`;
         if (displayCard) displayCard.innerText = `R$ ${card.toFixed(2)}`;
         if (displayDin) displayDin.innerText = `R$ ${din.toFixed(2)}`;
         if (displayTotal) displayTotal.innerText = `R$ ${(pix + card + din).toFixed(2)}`;
+        if (displayTotalItens) displayTotalItens.innerText = `R$ ${totalItens.toFixed(2)}`;
+        if (displayTotalEntregas) displayTotalEntregas.innerText = `R$ ${totalEntregas.toFixed(2)}`;
 
         // Populate Cashier real-time grouping sold items list (economia de cota)
         const corpoItens = document.getElementById('itens-vendidos-corpo');
@@ -1292,6 +1328,8 @@
         const cartaoVal = document.getElementById('b-cartao')?.innerText || "R$ 0,00";
         const dinheiroVal = document.getElementById('b-dinheiro')?.innerText || "R$ 0,00";
         const totalVal = document.getElementById('b-total')?.innerText || "R$ 0,00";
+        const totalItensVal = document.getElementById('b-total-itens')?.innerText || "R$ 0,00";
+        const totalEntregasVal = document.getElementById('b-total-entregas')?.innerText || "R$ 0,00";
         const dataVal = document.getElementById('data-atual')?.innerText || new Date().toLocaleDateString('pt-BR');
 
         // Reconstruir a listagem de itens vendidos de forma totalmente legível e elegante para compartillhar no whatsapp
@@ -1414,11 +1452,25 @@
                     </table>
                 </div>
 
-                <div style="background: rgba(255,189,89,0.05); border: 1px solid rgba(255,189,89,0.2); border-radius: 16px; padding: 18px; margin-bottom: 25px; text-align: center;">
+                <div style="background: rgba(255,189,89,0.05); border: 1px solid rgba(255,189,89,0.2); border-radius: 16px; padding: 18px; margin-bottom: 25px; text-align: center; box-sizing: border-box;">
                     <span style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: block; margin-bottom: 4px;">
-                        Faturamento Global do Período
+                        Faturamento Global (Total)
                     </span>
-                    <div style="font-size: 32px; font-weight: 950; color: #ffbd59; letter-spacing: -0.5px;">${totalVal}</div>
+                    <div style="font-size: 32px; font-weight: 950; color: #ffbd59; letter-spacing: -0.5px; margin-bottom: 12px;">${totalVal}</div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,189,89,0.2); margin: 12px 0;"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                        <div style="flex: 1; text-align: left; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,189,89,0.1);">
+                            <span style="color: #888; font-size: 9px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 3px;">🍔 Valor dos Itens</span>
+                            <span style="font-size: 14px; font-weight: 800; color: #ffffff;">${totalItensVal}</span>
+                        </div>
+                        <div style="font-weight: bold; color: #ffbd59; font-size: 14px;">+</div>
+                        <div style="flex: 1; text-align: left; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,189,89,0.1);">
+                            <span style="color: #888; font-size: 9px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 3px;">🛵 Entregas</span>
+                            <span style="font-size: 14px; font-weight: 800; color: #ffffff;">${totalEntregasVal}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
