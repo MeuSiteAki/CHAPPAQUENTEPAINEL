@@ -319,6 +319,9 @@
         <div class="item-menu-gaveta" onclick="window.navegarParaAba(this,'tab-balanco')" style="padding:15px; color:white; display:flex; align-items:center; gap:15px; cursor:pointer; border-radius:8px; transition:0.3s; margin-bottom:5px;">
             <i class="fas fa-wallet" style="width:20px; color:var(--gold);"></i> <b>Caixa</b>
         </div>
+        <div class="item-menu-gaveta" onclick="window.navegarParaAba(this,'tab-funcionarios')" style="padding:15px; color:white; display:flex; align-items:center; gap:15px; cursor:pointer; border-radius:8px; transition:0.3s; margin-bottom:5px;">
+             <i class="fas fa-users" style="width:20px; color:var(--gold);"></i> <b>Funcionários</b>
+        </div>
         <button id="btn-toggle-loja" onclick="window.toggleLoja()"
             style="background:#2e7d32; color:white; border:none; padding:12px 16px; width: 100%; margin-top: 20px;
             border-radius:10px; cursor:pointer; font-weight:bold; font-size:0.85rem; white-space:nowrap; transition: 0.3s;">
@@ -528,7 +531,84 @@
             </button>
         </div>
     </section>
+<!-- ABA: FUNCIONÁRIOS -->
+<section id="tab-funcionarios" class="tab-content">
+    <div style="max-width:900px; margin:0 auto;">
 
+        <!-- CABEÇALHO -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:25px;">
+            <i class="fas fa-users" style="color:var(--gold); font-size:1.5rem;"></i>
+            <h2 style="margin:0; font-size:1.3rem; font-weight:800; text-transform:uppercase;">Consumo de Funcionários</h2>
+        </div>
+
+        <!-- FORMULÁRIO DE LANÇAMENTO -->
+        <div style="background:var(--glass); border:1px solid var(--glass-border); border-radius:20px; padding:20px; margin-bottom:25px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                <input type="text" id="func-nome" placeholder="Nome do funcionário"
+                    style="flex:1; min-width:180px; background:#000; border:1px solid #333; color:white; padding:12px; border-radius:10px; font-size:0.9rem;">
+                <select id="func-item" style="flex:2; min-width:220px; background:#000; border:1px solid var(--gold); color:var(--gold); padding:12px; border-radius:10px; font-size:0.85rem; font-weight:bold;">
+                    <option value="">-- Selecione o item --</option>
+                </select>
+                <button onclick="window.adicionarConsumoFunc()"
+                    style="background:var(--grad); color:white; border:none; padding:12px 22px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.9rem; white-space:nowrap;">
+                    <i class="fas fa-plus"></i> ADICIONAR
+                </button>
+            </div>
+            <div style="font-size:0.75rem; color:#666; margin-top:5px;">
+                <i class="fas fa-info-circle" style="color:var(--gold);"></i> Selecione o funcionário e o item para registrar o consumo.
+            </div>
+        </div>
+
+        <!-- TABELA DE CONSUMO -->
+        <div style="background:var(--glass); border:1px solid var(--glass-border); border-radius:20px; padding:20px; overflow-x:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0; color:var(--gold); font-size:1rem; font-weight:800; text-transform:uppercase;">
+                    <i class="fas fa-clipboard-list"></i> Registro do Dia
+                </h3>
+                <button onclick="window.limparConsumoFunc()"
+                    style="background:rgba(255,77,77,0.15); border:1px solid rgba(255,77,77,0.3); color:#ff5252; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:700;">
+                    <i class="fas fa-trash"></i> LIMPAR TUDO
+                </button>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+                <thead>
+                    <tr style="border-bottom:2px solid rgba(255,189,89,0.3); color:#888; font-size:0.72rem; text-transform:uppercase; font-weight:800;">
+                        <th style="text-align:left; padding:10px 8px;">Funcionário</th>
+                        <th style="text-align:left; padding:10px 8px;">Item</th>
+                        <th style="text-align:center; padding:10px 8px; width:50px;">Qtd</th>
+                        <th style="text-align:right; padding:10px 8px; width:100px;">Valor Unit.</th>
+                        <th style="text-align:right; padding:10px 8px; width:100px;">Subtotal</th>
+                        <th style="text-align:center; padding:10px 8px; width:40px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="func-tabela-corpo">
+                    <tr id="func-linha-vazia">
+                        <td colspan="6" style="text-align:center; padding:30px; color:#555; font-style:italic;">
+                            Nenhum consumo registrado ainda.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- TOTAIS POR FUNCIONÁRIO -->
+            <div id="func-resumo-por-pessoa" style="margin-top:20px; display:none;">
+                <div style="border-top:1px solid rgba(255,255,255,0.07); padding-top:15px; margin-top:10px;">
+                    <p style="color:#888; font-size:0.72rem; text-transform:uppercase; font-weight:800; margin-bottom:10px; letter-spacing:1px;">
+                        <i class="fas fa-chart-bar" style="color:var(--gold);"></i> Resumo por Funcionário
+                    </p>
+                    <div id="func-resumo-lista" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                </div>
+            </div>
+
+            <!-- TOTAL GERAL -->
+            <div style="border-top:2px solid rgba(255,189,89,0.2); margin-top:20px; padding-top:15px; display:flex; justify-content:flex-end; align-items:center; gap:20px;">
+                <span style="color:#888; font-size:0.9rem; font-weight:600; text-transform:uppercase;">Total Geral de Consumo:</span>
+                <span id="func-total-geral" style="color:var(--gold); font-size:1.8rem; font-weight:900;">R$ 0,00</span>
+            </div>
+        </div>
+    </div>
+</section>
 </main>
 
 <!-- MENU LATERAL (MESAS) -->
@@ -2012,6 +2092,8 @@
         window.abrirGavetaLateral(false);
     };
 
+    
+
     // Bloqueios de segurança
     document.addEventListener('keydown', function (e) {
         if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
@@ -2059,6 +2141,183 @@
         return hashDigitada === senhaHashCorreta;
     }
 </script>
+<script>
+(function() {
+    // ── ESTADO ─────────────────────────────────────────────────────────────
+    let registrosFunc = JSON.parse(localStorage.getItem('chappa_func_consumo') || '[]');
 
+    // ── POPULAR SELECT COM O CARDÁPIO ───────────────────────────────────────
+    function popularSelectFunc() {
+        const sel = document.getElementById('func-item');
+        if (!sel || !window.__cardapio) return;
+        sel.innerHTML = '<option value="">-- Selecione o item --</option>';
+        for (const cat in window.__cardapio) {
+            const grupo = document.createElement('optgroup');
+            grupo.label = cat;
+            window.__cardapio[cat].forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify({ n: item.n, p: item.p });
+                opt.textContent = `${item.n}  —  R$ ${item.p.toFixed(2)}`;
+                grupo.appendChild(opt);
+            });
+            sel.appendChild(grupo);
+        }
+    }
+
+    // ── SALVAR NO LOCALSTORAGE ──────────────────────────────────────────────
+    function salvarFunc() {
+        localStorage.setItem('chappa_func_consumo', JSON.stringify(registrosFunc));
+    }
+
+    // ── RENDERIZAR TABELA ───────────────────────────────────────────────────
+    function renderizarFunc() {
+        const corpo = document.getElementById('func-tabela-corpo');
+        const resumoLista = document.getElementById('func-resumo-lista');
+        const resumoBox = document.getElementById('func-resumo-por-pessoa');
+        const totalGeral = document.getElementById('func-total-geral');
+        if (!corpo) return;
+
+        if (registrosFunc.length === 0) {
+            corpo.innerHTML = `<tr id="func-linha-vazia"><td colspan="6" style="text-align:center; padding:30px; color:#555; font-style:italic;">Nenhum consumo registrado ainda.</td></tr>`;
+            if (resumoBox) resumoBox.style.display = 'none';
+            if (totalGeral) totalGeral.innerText = 'R$ 0,00';
+            return;
+        }
+
+        // Agrupar por nome+item para mostrar quantidade
+        const agrupado = {};
+        registrosFunc.forEach((r, idx) => {
+            const chave = `${r.func}||${r.item}||${r.preco}`;
+            if (!agrupado[chave]) {
+                agrupado[chave] = { func: r.func, item: r.item, preco: r.preco, qty: 0, indices: [] };
+            }
+            agrupado[chave].qty++;
+            agrupado[chave].indices.push(idx);
+        });
+
+        corpo.innerHTML = Object.values(agrupado).map(g => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:0.2s;"
+                onmouseover="this.style.background='rgba(255,189,89,0.04)'"
+                onmouseout="this.style.background='none'">
+                <td style="padding:12px 8px; font-weight:700; color:white;">${g.func}</td>
+                <td style="padding:12px 8px; color:#ccc;">${g.item}</td>
+                <td style="padding:12px 8px; text-align:center;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <button onclick="window.alterarQtyFunc('${g.func}','${g.item}',${g.preco},-1)"
+                            style="background:#333; border:none; color:white; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; display:flex; align-items:center; justify-content:center;">−</button>
+                        <span style="font-weight:800; color:var(--gold); min-width:20px; text-align:center;">${g.qty}</span>
+                        <button onclick="window.alterarQtyFunc('${g.func}','${g.item}',${g.preco},1)"
+                            style="background:var(--gold); border:none; color:black; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; display:flex; align-items:center; justify-content:center;">+</button>
+                    </div>
+                </td>
+                <td style="padding:12px 8px; text-align:right; color:#aaa;">R$ ${g.preco.toFixed(2)}</td>
+                <td style="padding:12px 8px; text-align:right; font-weight:800; color:white;">R$ ${(g.preco * g.qty).toFixed(2)}</td>
+                <td style="padding:12px 8px; text-align:center;">
+                    <button onclick="window.removerGrupoFunc('${g.func}','${g.item}',${g.preco})"
+                        style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:0.9rem; padding:4px 8px; border-radius:6px; transition:0.2s;"
+                        title="Remover">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        // Resumo por pessoa
+        const porPessoa = {};
+        registrosFunc.forEach(r => {
+            if (!porPessoa[r.func]) porPessoa[r.func] = 0;
+            porPessoa[r.func] += r.preco;
+        });
+
+        if (resumoLista) {
+            resumoLista.innerHTML = Object.entries(porPessoa).map(([nome, total]) => `
+                <div style="background:rgba(255,189,89,0.07); border:1px solid rgba(255,189,89,0.2); border-radius:12px; padding:12px 18px; display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-user-circle" style="color:var(--gold); font-size:1.2rem;"></i>
+                    <div>
+                        <div style="font-weight:800; color:white; font-size:0.9rem;">${nome}</div>
+                        <div style="color:var(--gold); font-weight:700; font-size:1rem;">R$ ${total.toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        if (resumoBox) resumoBox.style.display = 'block';
+
+        const totalGeralVal = registrosFunc.reduce((acc, r) => acc + r.preco, 0);
+        if (totalGeral) totalGeral.innerText = `R$ ${totalGeralVal.toFixed(2)}`;
+    }
+
+    // ── ADICIONAR ITEM ──────────────────────────────────────────────────────
+    window.adicionarConsumoFunc = () => {
+        const nomeInput = document.getElementById('func-nome');
+        const itemSel   = document.getElementById('func-item');
+        const nome = nomeInput?.value.trim().toUpperCase();
+        const itemRaw = itemSel?.value;
+
+        if (!nome) {
+            Swal.fire({ icon:'warning', title:'Atenção', text:'Digite o nome do funcionário!', background:'#111', color:'#fff', confirmButtonColor:'#dfbd59' });
+            return;
+        }
+        if (!itemRaw) {
+            Swal.fire({ icon:'warning', title:'Atenção', text:'Selecione um item!', background:'#111', color:'#fff', confirmButtonColor:'#dfbd59' });
+            return;
+        }
+
+        const item = JSON.parse(itemRaw);
+        registrosFunc.push({ func: nome, item: item.n, preco: item.p });
+        salvarFunc();
+        renderizarFunc();
+
+        itemSel.value = '';
+        Swal.fire({ icon:'success', toast:true, position:'top-end', showConfirmButton:false, timer:1200,
+            title:`${item.n} adicionado para ${nome}`, background:'#1a1a1a', color:'#fff' });
+    };
+
+    // ── ALTERAR QUANTIDADE ──────────────────────────────────────────────────
+    window.alterarQtyFunc = (func, item, preco, delta) => {
+        if (delta > 0) {
+            registrosFunc.push({ func, item, preco });
+        } else {
+            const idx = registrosFunc.findLastIndex(r => r.func === func && r.item === item && r.preco === preco);
+            if (idx !== -1) registrosFunc.splice(idx, 1);
+        }
+        salvarFunc();
+        renderizarFunc();
+    };
+
+    // ── REMOVER GRUPO ───────────────────────────────────────────────────────
+    window.removerGrupoFunc = (func, item, preco) => {
+        registrosFunc = registrosFunc.filter(r => !(r.func === func && r.item === item && r.preco === preco));
+        salvarFunc();
+        renderizarFunc();
+    };
+
+    // ── LIMPAR TUDO ─────────────────────────────────────────────────────────
+    window.limparConsumoFunc = async () => {
+        const ok = await Swal.fire({
+            title:'Limpar registros?', text:'Todos os consumos do dia serão apagados.',
+            icon:'warning', showCancelButton:true, confirmButtonColor:'#c62828',
+            confirmButtonText:'Sim, limpar', cancelButtonText:'Cancelar',
+            background:'#111', color:'#fff'
+        });
+        if (ok.isConfirmed) {
+            registrosFunc = [];
+            salvarFunc();
+            renderizarFunc();
+        }
+    };
+
+    // ── INICIALIZAR ─────────────────────────────────────────────────────────
+    // Aguarda o cardápio carregar (módulo async)
+    function tentarInicializar(tentativas) {
+        if (window.__cardapio) {
+            popularSelectFunc();
+            renderizarFunc();
+        } else if (tentativas > 0) {
+            setTimeout(() => tentarInicializar(tentativas - 1), 300);
+        }
+    }
+    setTimeout(() => tentarInicializar(20), 500);
+})();
+</script>
 </body>
 </html>
