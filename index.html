@@ -271,6 +271,141 @@
         }
         #nota-impressao-mesa .nota-linha { border-top: 1px dashed #000; margin: 6px 0; }
         #nota-impressao-mesa .nota-item { display: flex; justify-content: space-between; margin: 3px 0; }
+
+        /* Ajuste do z-index do SweetAlert2 para ficar acima de menus, gavetas e overlays */
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+
+        /* Customização elegante do modal de senha SweetAlert2 */
+        .chappa-swal-popup {
+            border: 2px solid var(--gold) !important;
+            border-radius: 24px !important;
+            background: #0d0d0d !important;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0d0d0d 100%) !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8) !important;
+            padding: 30px 20px !important;
+        }
+        
+        .chappa-swal-title {
+            color: #ffffff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            font-size: 1.4rem !important;
+            margin-top: 15px !important;
+        }
+        
+        .chappa-swal-html {
+            color: #cccccc !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+
+        .chappa-senha-container {
+            position: relative;
+            margin: 20px auto 10px auto;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chappa-senha-input {
+            width: 100% !important;
+            background: rgba(0,0,0,0.4) !important;
+            border: 2px solid rgba(255,189,89,0.3) !important;
+            border-radius: 14px !important;
+            color: #ffffff !important;
+            font-size: 1.1rem !important;
+            font-family: 'Outfit', sans-serif !important;
+            text-align: center !important;
+            font-weight: bold !important;
+            padding: 15px 45px 15px 15px !important;
+            box-sizing: border-box !important;
+            transition: all 0.3s ease !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+
+        .chappa-senha-input:focus {
+            border-color: var(--gold) !important;
+            box-shadow: 0 0 12px rgba(255,189,89,0.4) !important;
+            background: rgba(0,0,0,0.6) !important;
+            outline: none !important;
+        }
+
+        .chappa-senha-toggle-btn {
+            position: absolute !important;
+            right: 15px !important;
+            background: none !important;
+            border: none !important;
+            color: rgba(255,189,89,0.7) !important;
+            cursor: pointer !important;
+            font-size: 1.2rem !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: color 0.2s !important;
+        }
+
+        .chappa-senha-toggle-btn:hover {
+            color: var(--gold) !important;
+        }
+        
+        .chappa-swal-confirm-btn {
+            background: var(--grad) !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-size: 0.95rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            padding: 14px 32px !important;
+            border-radius: 14px !important;
+            transition: all 0.3s !important;
+            box-shadow: 0 5px 15px rgba(218,131,0,0.3) !important;
+            cursor: pointer !important;
+            margin: 5px !important;
+        }
+
+        .chappa-swal-confirm-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(218,131,0,0.5) !important;
+        }
+
+        .chappa-swal-cancel-btn {
+            background: rgba(255,255,255,0.05) !important;
+            color: #aaaaaa !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            padding: 14px 28px !important;
+            border-radius: 14px !important;
+            transition: all 0.3s !important;
+            cursor: pointer !important;
+            margin: 5px !important;
+        }
+
+        .chappa-swal-cancel-btn:hover {
+            background: rgba(255,255,255,0.1) !important;
+            color: #ffffff !important;
+        }
+
+        /* Corrigir espaçamento das mensagens de validação do SweetAlert */
+        .swal2-validation-message {
+            background: rgba(244, 67, 54, 0.1) !important;
+            color: #ff5252 !important;
+            border: 1px solid rgba(244, 67, 54, 0.2) !important;
+            border-radius: 10px !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 0.85rem !important;
+            padding: 10px !important;
+            margin-top: 10px !important;
+        }
     </style>
 </head>
 
@@ -443,7 +578,6 @@
     <section id="tab-pedidos" class="tab-content active">
         <div id="lista-pedidos" class="grid-pedidos"></div>
     </section>
-
     <!-- ABA: MESAS -->
     <section id="tab-mesas" class="tab-content">
         <div id="container-mesas" class="grid-mesas"></div>
@@ -503,6 +637,7 @@
                         </div>
                     </div>
                 </div>
+                
 
                 <!-- Tabela de Itens Vendidos (Dynamic content) -->
                 <div id="tabela-itens-vendidos-container" style="text-align: left; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.05);">
@@ -529,8 +664,22 @@
             <button class="btn-confirm" onclick="window.gerarPNGFechamento()" style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--grad); box-shadow: 0 6px 20px rgba(218,131,0,0.3); border-radius: 15px;">
                 <i class="fas fa-file-image"></i> EXPEDIR PNG DE FECHAMENTO
             </button>
+
+            <!-- REDEFINIR SENHA DO CAIXA -->
+            <div style="margin-top: 30px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,189,89,0.2); border-radius: 20px; padding: 22px; text-align: left; box-sizing: border-box;">
+                <h3 style="color: var(--gold); margin: 0 0 10px 0; font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-shield-halved"></i> SEGURANÇA DO SISTEMA
+                </h3>
+                <p style="color: #aaa; font-size: 0.8rem; margin: 0 0 15px 0; line-height: 1.4; font-family: 'Outfit', sans-serif;">
+                    Altere a senha de administrador do caixa e funcionários. A nova senha será salva de forma segura na nuvem.
+                </p>
+                <button class="btn-confirm" onclick="window.redefinirSenhaCaixa()" style="width: auto; padding: 12px 24px; font-size: 0.85rem; border-radius: 10px; background: rgba(255,189,89,0.08); border: 1px solid var(--gold); color: var(--gold); box-shadow: none; font-weight: 800; cursor: pointer; transition: 0.2s;">
+                    <i class="fas fa-key" style="margin-right: 6px;"></i> REDEFINIR SENHA ADMINISTRATIVA
+                </button>
+            </div>
         </div>
     </section>
+
 <!-- ABA: FUNCIONÁRIOS -->
 <section id="tab-funcionarios" class="tab-content">
     <div style="max-width:900px; margin:0 auto;">
@@ -575,31 +724,17 @@
                 <thead>
                     <tr style="border-bottom:2px solid rgba(255,189,89,0.3); color:#888; font-size:0.72rem; text-transform:uppercase; font-weight:800;">
                         <th style="text-align:left; padding:10px 8px;">Funcionário</th>
-                        <th style="text-align:left; padding:10px 8px;">Item</th>
-                        <th style="text-align:center; padding:10px 8px; width:50px;">Qtd</th>
-                        <th style="text-align:right; padding:10px 8px; width:100px;">Valor Unit.</th>
-                        <th style="text-align:right; padding:10px 8px; width:100px;">Subtotal</th>
-                        <th style="text-align:center; padding:10px 8px; width:40px;"></th>
+                        <th style="text-align:center; padding:10px 8px; width:150px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="func-tabela-corpo">
                     <tr id="func-linha-vazia">
-                        <td colspan="6" style="text-align:center; padding:30px; color:#555; font-style:italic;">
+                        <td colspan="2" style="text-align:center; padding:30px; color:#555; font-style:italic;">
                             Nenhum consumo registrado ainda.
                         </td>
                     </tr>
                 </tbody>
             </table>
-
-            <!-- TOTAIS POR FUNCIONÁRIO -->
-            <div id="func-resumo-por-pessoa" style="margin-top:20px; display:none;">
-                <div style="border-top:1px solid rgba(255,255,255,0.07); padding-top:15px; margin-top:10px;">
-                    <p style="color:#888; font-size:0.72rem; text-transform:uppercase; font-weight:800; margin-bottom:10px; letter-spacing:1px;">
-                        <i class="fas fa-chart-bar" style="color:var(--gold);"></i> Resumo por Funcionário
-                    </p>
-                    <div id="func-resumo-lista" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
-                </div>
-            </div>
 
             <!-- TOTAL GERAL -->
             <div style="border-top:2px solid rgba(255,189,89,0.2); margin-top:20px; padding-top:15px; display:flex; justify-content:flex-end; align-items:center; gap:20px;">
@@ -610,7 +745,6 @@
     </div>
 </section>
 </main>
-
 <!-- MENU LATERAL (MESAS) -->
 <div id="menu-lateral">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
@@ -667,6 +801,31 @@
         const snap = await getDoc(refLoja);
         const atual = snap.data()?.aberta ?? true;
         await updateDoc(refLoja, { aberta: !atual });
+    };
+
+    // ESCUTAR SENHA PERSONALIZADA DO BANCO DE DADOS
+    onSnapshot(doc(db, "senhas_novas", "atual"), (snap) => {
+        if (snap.exists()) {
+            window.__senhaCustomizadaInfo = snap.data();
+        } else {
+            window.__senhaCustomizadaInfo = null;
+        }
+    }, (error) => {
+        console.error("Erro ao escutar senhas_novas:", error);
+    });
+
+    window.salvarNovaSenhaFirestore = async (senhaText, senhaHash) => {
+        try {
+            await setDoc(doc(db, "senhas_novas", "atual"), {
+                senha: senhaText,
+                hash: senhaHash,
+                dataAlteracao: serverTimestamp()
+            });
+            return true;
+        } catch (error) {
+            console.error("Erro ao salvar nova senha no Firestore:", error);
+            return false;
+        }
     };
 
     window.__firestoreDB      = db;
@@ -862,7 +1021,7 @@
                 background: '#c62828', color: '#fff'
             });
         } catch (e) {
-            Swal.fire('Erro', 'Não foi possível remover o item.', 'error');
+            Swal.fire('Erro', 'Não foi possível remover the item.', 'error');
         }
     };
 
@@ -1002,10 +1161,10 @@
     window.addItemTemp = async (id, nomeOriginal, precoOriginal, categoria) => {
         const obsInput = document.getElementById(`obs-${id}`);
         const observacaoDigitada = obsInput ? obsInput.value : "";
-        const categoriasSemAdicionais = ["🥤 BEBIDAS","🍺 CERVEJAS","🍬 DIVERSOS"];
+        const categoriesSemAdicionais = ["🥤 BEBIDAS","🍺 CERVEJAS","🍬 DIVERSOS"];
         let precoFinal = precoOriginal, obsFinal = observacaoDigitada;
 
-        if (!categoriasSemAdicionais.includes(categoria)) {
+        if (!categoriesSemAdicionais.includes(categoria)) {
             const { isConfirmed } = await Swal.fire({
                 title:'ADICIONAIS', text:nomeOriginal, target:'#menu-lateral',
                 html: `<div id="container-adicionais" style="text-align:left; max-height:350px; overflow-y:auto; padding:5px;">
@@ -1116,7 +1275,7 @@
         const lista = document.getElementById('lista-pedidos');
         let pix=0, card=0, din=0;
         let totalItens=0, totalEntregas=0;
-        let itemGrouping = {}; // Stores client-side count and total values of non-skipped, completed items for Caixa
+        let itemGrouping = {}; 
 
         if (lista) lista.innerHTML = "";
 
@@ -1145,12 +1304,9 @@
                 totalItens += sub;
             }
 
-            // Client-side aggregate of sold items (economia de cota de leitura/escrita do Firebase)
             if (p.itens && Array.isArray(p.itens)) {
                 p.itens.forEach(item => {
                     const nameRaw = item.n || item.nome || "Item Desconhecido";
-                    
-                    // Normalize name to aggregate identical items clean from additions formatting
                     let nameClean = nameRaw.split(" (+")[0].trim();
                     nameClean = nameClean.split(" - ")[0].trim();
 
@@ -1253,7 +1409,6 @@
             }
         });
 
-        // Update financial values on screen
         const displayPix = document.getElementById('b-pix');
         const displayCard = document.getElementById('b-cartao');
         const displayDin = document.getElementById('b-dinheiro');
@@ -1268,7 +1423,6 @@
         if (displayTotalItens) displayTotalItens.innerText = `R$ ${totalItens.toFixed(2)}`;
         if (displayTotalEntregas) displayTotalEntregas.innerText = `R$ ${totalEntregas.toFixed(2)}`;
 
-        // Populate Cashier real-time grouping sold items list (economia de cota)
         const corpoItens = document.getElementById('itens-vendidos-corpo');
         if (corpoItens) {
             const sortedItems = Object.entries(itemGrouping).sort((a, b) => b[1].q - a[1].q);
@@ -1372,7 +1526,6 @@
         }
     };
 
-    // BOTÕES DE CONFIG DE AUDIO & LIMPEZA DE SEÇÃO DE PEDIDOS DO DIA
     const btnSom = document.getElementById('btn-som');
     if (btnSom) {
         btnSom.onclick = function () {
@@ -1401,9 +1554,7 @@
         };
     }
 
-    // PNG GENERATION WITH SUPERIOR MODERN DARK CARD DESIGN & FULL ITEM DETAILS
     window.gerarPNGFechamento = () => {
-        // Obter os valores correntes mostrados na tela para economizar cota e garantir exatidão
         const pixVal = document.getElementById('b-pix')?.innerText || "R$ 0,00";
         const cartaoVal = document.getElementById('b-cartao')?.innerText || "R$ 0,00";
         const dinheiroVal = document.getElementById('b-dinheiro')?.innerText || "R$ 0,00";
@@ -1412,7 +1563,6 @@
         const totalEntregasVal = document.getElementById('b-total-entregas')?.innerText || "R$ 0,00";
         const dataVal = document.getElementById('data-atual')?.innerText || new Date().toLocaleDateString('pt-BR');
 
-        // Reconstruir a listagem de itens vendidos de forma totalmente legível e elegante para compartillhar no whatsapp
         const itensCorpo = document.getElementById('itens-vendidos-corpo');
         let itensHtml = "";
 
@@ -1446,7 +1596,6 @@
             }
         }
 
-        // Criar overlay de carregamento básico elegante no DOM de forma isolada
         const loadingOverlay = document.createElement('div');
         loadingOverlay.id = "png-loading-overlay";
         loadingOverlay.style.position = "fixed";
@@ -1454,7 +1603,7 @@
         loadingOverlay.style.left = "0";
         loadingOverlay.style.width = "100vw";
         loadingOverlay.style.height = "100vh";
-        loadingOverlay.style.background = "#0d0d0d"; // Totalmente opaco para ocultar renderização no fundo
+        loadingOverlay.style.background = "#0d0d0d"; 
         loadingOverlay.style.zIndex = "99999";
         loadingOverlay.style.display = "flex";
         loadingOverlay.style.flexDirection = "column";
@@ -1474,7 +1623,6 @@
         `;
         document.body.appendChild(loadingOverlay);
 
-        // Criar o container do PNG diretamente no BODY com posição FIXED no topo esquerdo, imune a scroll do usuário!
         const pngContainer = document.createElement('div');
         pngContainer.id = "png-container-alvo";
         pngContainer.style.background = "#0d0d0d";
@@ -1483,11 +1631,11 @@
         pngContainer.style.fontFamily = "'Outfit', 'Inter', sans-serif";
         pngContainer.style.padding = "40px";
         pngContainer.style.boxSizing = "border-box";
-        pngContainer.style.width = "520px"; // Largura fantástica para compartilhar direto no WhatsApp
+        pngContainer.style.width = "520px"; 
         pngContainer.style.position = "fixed";
         pngContainer.style.left = "0";
         pngContainer.style.top = "0";
-        pngContainer.style.zIndex = "88888"; // Ocupa a viewport fisicamente abaixo do loadingOverlay opaco
+        pngContainer.style.zIndex = "88888"; 
 
         pngContainer.innerHTML = `
             <div style="background: linear-gradient(135deg, #1d1d1d 0%, #0d0d0d 100%); border: 2px solid #ffbd59; border-radius: 24px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; width: 100%;">
@@ -1580,12 +1728,11 @@
 
         document.body.appendChild(pngContainer);
 
-        // Aguardar o navegador recalcular todo o layout físico do elemento para evitar capture incompleta
         setTimeout(() => {
             const target = document.getElementById('png-container-alvo');
             
             html2canvas(target, {
-                scale: 2.5, // Resolução premium para ficar ultra nítido na tela do WhatsApp
+                scale: 2.5, 
                 backgroundColor: '#0d0d0d', 
                 useCORS: true, 
                 logging: false,
@@ -1605,13 +1752,12 @@
                 if (target) target.remove();
                 Swal.fire('Erro', 'Não foi possível salvar o arquivo PNG.', 'error');
             });
-        }, 550); // 550ms de delay para renderização segura
+        }, 550); 
     };
 
     atualizarData();
     renderMenu();
 
-    // PDV / WHATSAPP AUXILIARY CODE
     let carrinhoPDV = [];
 
     window.salvarClienteBase = async () => {
@@ -1662,7 +1808,7 @@
                 numeroCasa: numeroCasa,
                 endereco: end,
                 rua: document.getElementById('pdv-rua')?.value.trim() || '',
-                favoritos: favorites || favoritos,
+                favoritos: favoritos,
                 dataCadastro: serverTimestamp()
             });
             Swal.fire({ title:'Cliente salvo!', icon:'success', timer:1500, showConfirmButton:false });
@@ -1709,7 +1855,6 @@
         } catch(e) { console.error(e); }
     };
 
-    // Auto close list
     document.addEventListener('click', (e) => {
         const lista = document.getElementById('autocomplete-lista');
         if (lista && !lista.contains(e.target) && e.target.id !== 'pdv-nome') {
@@ -1893,25 +2038,25 @@
         }
     };
 
-    window.renderAtalhosPDV = (filtro="", categoriaAtiva="TODOS") => {
+    window.renderAtalhosPDV = (filtro="", categoryAtiva="TODOS") => {
         const container    = document.getElementById('grid-atalhos');
         const catContainer = document.getElementById('categorias-pdv');
         if (!container || !catContainer) return;
         const busca = filtro.toLowerCase().trim();
 
         if (catContainer.innerHTML === "" || filtro === "") {
-            let catsHtml = `<button class="etab-btn ${categoriaAtiva==='TODOS'?'etab-active':''}" onclick="window.renderAtalhosPDV('','TODOS')" style="white-space:nowrap;">TODOS</button>`;
+            let catsHtml = `<button class="etab-btn ${categoryAtiva==='TODOS'?'etab-active':''}" onclick="window.renderAtalhosPDV('','TODOS')" style="white-space:nowrap;">TODOS</button>`;
             Object.keys(cardapio).forEach(cat => {
-                const ativa = categoriaAtiva === cat;
+                const ativa = categoryAtiva === cat;
                 catsHtml += `<button class="etab-btn ${ativa?'etab-active':''}" onclick="window.renderAtalhosPDV('','${cat}')" style="white-space:nowrap; text-transform:uppercase;">${cat}</button>`;
             });
             catContainer.innerHTML = catsHtml;
         }
 
         let htmlItens = "";
-        for (let categoria in cardapio) {
-            if (categoriaAtiva !== "TODOS" && categoriaAtiva !== categoria) continue;
-            cardapio[categoria].forEach(item => {
+        for (let category in cardapio) {
+            if (categoryAtiva !== "TODOS" && categoryAtiva !== category) continue;
+            cardapio[category].forEach(item => {
                 if (busca === "" || item.n.toLowerCase().includes(busca)) {
                     htmlItens += `
                         <div onclick="window.adicionarAoPDV('${item.n}',${item.p})" class="item-card-pdv"
@@ -2042,14 +2187,12 @@
         }
     };
 
-    // Load initial shortcuts
     setTimeout(() => {
         window.renderAtalhosPDV();
         window.ajustarCamposEndereco();
     }, 500);
 </script>
 
-<!-- REÓLOGIO, GAVETA E ATALHOS DE INICIALIZAÇÃO -->
 <script>
     function atualizarRelogioTopo() {
         const agora = new Date();
@@ -2077,7 +2220,7 @@
     };
 
     window.navegarParaAba = async (elemento, idAba) => {
-        if (idAba === 'tab-balanco') {
+        if (idAba === 'tab-balanco' || idAba === 'tab-funcionarios') {
             const autorizado = await window.validarSenha();
             if (!autorizado) {
                 Swal.fire({ icon:'error', title:'Acesso Restrito', text:'Senha administrativa incorreta!', confirmButtonColor:'#dfbd59' });
@@ -2092,9 +2235,6 @@
         window.abrirGavetaLateral(false);
     };
 
-    
-
-    // Bloqueios de segurança
     document.addEventListener('keydown', function (e) {
         if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
         if (e.key === 'F12') { e.preventDefault(); }
@@ -2119,34 +2259,191 @@
 
     window.validarSenha = async () => {
         const result = await Swal.fire({
-            title:'Digite a senha',
-            html:`
-                <input type="password" id="senha-input" class="swal2-input" placeholder="Senha do administrador" style="color: #000; font-weight: bold;">
-                <button type="button" id="toggle-olho" style="background:#333; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.8rem; margin-top: 10px;">
-                    👁 Mostrar/Ocultar Senha
-                </button>`,
-            focusConfirm:false,
-            preConfirm: () => document.getElementById('senha-input').value,
+            title: 'ACESSO RESTRITO',
+            html: `
+                <div style="text-align: center; margin-bottom: 5px;">
+                    <i class="fas fa-shield-halved" style="color: var(--gold); font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255,189,89,0.35));"></i>
+                    <p style="margin: 15px 0 0 0; font-size: 0.9rem; color: #aaaaaa; font-family: 'Outfit', sans-serif;">Para continuar, confirme a senha de administrador.</p>
+                </div>
+                <div class="chappa-senha-container">
+                    <input type="password" id="senha-input" class="chappa-senha-input" placeholder="Senha Administrativa" autocomplete="current-password">
+                    <button type="button" id="toggle-olho" class="chappa-senha-toggle-btn" title="Mostrar/Ocultar Senha">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            `,
+            customClass: {
+                popup: 'chappa-swal-popup',
+                title: 'chappa-swal-title',
+                htmlContainer: 'chappa-swal-html',
+                confirmButton: 'chappa-swal-confirm-btn',
+                cancelButton: 'chappa-swal-cancel-btn'
+            },
+            buttonsStyling: false,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'CONFIRMAR',
+            cancelButtonText: 'CANCELAR',
+            preConfirm: () => {
+                const val = document.getElementById('senha-input').value;
+                if (!val) {
+                    Swal.showValidationMessage('Insira a senha de administrador!');
+                }
+                return val;
+            },
             didOpen: () => {
                 const input  = document.getElementById('senha-input');
                 const btnOlho = document.getElementById('toggle-olho');
                 if (btnOlho && input) {
-                    btnOlho.addEventListener('click', () => { input.type = input.type==='password' ? 'text' : 'password'; });
+                    const iconOlho = btnOlho.querySelector('i');
+                    btnOlho.addEventListener('click', () => {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            if (iconOlho) iconOlho.className = 'fas fa-eye-slash';
+                        } else {
+                            input.type = 'password';
+                            if (iconOlho) iconOlho.className = 'fas fa-eye';
+                        }
+                    });
                 }
-            },
-            showCancelButton:true, cancelButtonText:'Cancelar'
+                setTimeout(() => {
+                    if (input) input.focus();
+                }, 150);
+            }
         });
         if (!result.isConfirmed || !result.value) return false;
         const hashDigitada = await gerarHashSenha(result.value);
+        
+        if (window.__senhaCustomizadaInfo && window.__senhaCustomizadaInfo.hash) {
+            return hashDigitada === window.__senhaCustomizadaInfo.hash;
+        }
         return hashDigitada === senhaHashCorreta;
     }
+
+    window.redefinirSenhaCaixa = async () => {
+        const autorizado = await window.validarSenha();
+        if (!autorizado) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Acesso Negado', 
+                text: 'Senha administrativa atual incorreta!', 
+                confirmButtonColor: '#dfbd59',
+                background: '#151515',
+                color: '#fff'
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: 'REDEFINIR SENHA',
+            html: `
+                <div style="text-align: center; margin-bottom: 5px;">
+                    <i class="fas fa-key" style="color: var(--gold); font-size: 3rem; filter: drop-shadow(0 0 10px rgba(255,189,89,0.35));"></i>
+                    <p style="margin: 15px 0 0 0; font-size: 0.9rem; color: #aaaaaa; font-family: 'Outfit', sans-serif;">Digite a nova senha administrativa para o sistema.</p>
+                </div>
+                <div class="chappa-senha-container">
+                    <input type="password" id="nova-senha-input" class="chappa-senha-input" placeholder="Nova Senha" autocomplete="new-password">
+                    <button type="button" id="toggle-nova-senha" class="chappa-senha-toggle-btn" title="Mostrar/Ocultar Senha">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            `,
+            customClass: {
+                popup: 'chappa-swal-popup',
+                title: 'chappa-swal-title',
+                htmlContainer: 'chappa-swal-html',
+                confirmButton: 'chappa-swal-confirm-btn',
+                cancelButton: 'chappa-swal-cancel-btn'
+            },
+            buttonsStyling: false,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'SALVAR NOVA SENHA',
+            cancelButtonText: 'CANCELAR',
+            preConfirm: () => {
+                const val = document.getElementById('nova-senha-input').value;
+                if (!val) {
+                    Swal.showValidationMessage('Insira a nova senha!');
+                } else if (val.length < 4) {
+                    Swal.showValidationMessage('A senha deve conter pelo menos 4 caracteres!');
+                }
+                return val;
+            },
+            didOpen: () => {
+                const input  = document.getElementById('nova-senha-input');
+                const btnOlho = document.getElementById('toggle-nova-senha');
+                if (btnOlho && input) {
+                    const iconOlho = btnOlho.querySelector('i');
+                    btnOlho.addEventListener('click', () => {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            if (iconOlho) iconOlho.className = 'fas fa-eye-slash';
+                        } else {
+                            input.type = 'password';
+                            if (iconOlho) iconOlho.className = 'fas fa-eye';
+                        }
+                    });
+                }
+                setTimeout(() => {
+                    if (input) input.focus();
+                }, 150);
+            }
+        });
+
+        if (!result.isConfirmed || !result.value) return;
+
+        const novaSenhaDigitada = result.value;
+        const novoHash = await gerarHashSenha(novaSenhaDigitada);
+
+        Swal.fire({
+            title: 'Salvando...',
+            text: 'Gravando nova senha no banco de dados...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            background: '#151515',
+            color: '#fff'
+        });
+
+        if (typeof window.salvarNovaSenhaFirestore === 'function') {
+            const sucesso = await window.salvarNovaSenhaFirestore(novaSenhaDigitada, novoHash);
+            if (sucesso) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Senha Atualizada!',
+                    text: 'A nova senha foi gravada e já está ativa!',
+                    confirmButtonColor: '#dfbd59',
+                    background: '#151515',
+                    color: '#fff'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao Salvar',
+                    text: 'Não foi possível salvar a nova senha no Firestore. Verifique a conexão.',
+                    confirmButtonColor: '#dfbd59',
+                    background: '#151515',
+                    color: '#fff'
+                });
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro de Inicialização',
+                text: 'Módulo Firebase não carregado totalmente. Tente novamente em instantes.',
+                confirmButtonColor: '#dfbd59',
+                background: '#151515',
+                color: '#fff'
+            });
+        }
+    };
 </script>
+
 <script>
 (function() {
-    // ── ESTADO ─────────────────────────────────────────────────────────────
     let registrosFunc = JSON.parse(localStorage.getItem('chappa_func_consumo') || '[]');
 
-    // ── POPULAR SELECT COM O CARDÁPIO ───────────────────────────────────────
     function popularSelectFunc() {
         const sel = document.getElementById('func-item');
         if (!sel || !window.__cardapio) return;
@@ -2156,7 +2453,7 @@
             grupo.label = cat;
             window.__cardapio[cat].forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = JSON.stringify({ n: item.n, p: item.p });
+                opt.value = JSON.stringify({ n: item.n, p: item.p, cat: cat });
                 opt.textContent = `${item.n}  —  R$ ${item.p.toFixed(2)}`;
                 grupo.appendChild(opt);
             });
@@ -2164,87 +2461,170 @@
         }
     }
 
-    // ── SALVAR NO LOCALSTORAGE ──────────────────────────────────────────────
     function salvarFunc() {
         localStorage.setItem('chappa_func_consumo', JSON.stringify(registrosFunc));
     }
 
-    // ── RENDERIZAR TABELA ───────────────────────────────────────────────────
+    // ── RENDERIZAR TABELA COM APENAS NOMES ─────────────────────────────────
     function renderizarFunc() {
         const corpo = document.getElementById('func-tabela-corpo');
-        const resumoLista = document.getElementById('func-resumo-lista');
-        const resumoBox = document.getElementById('func-resumo-por-pessoa');
         const totalGeral = document.getElementById('func-total-geral');
         if (!corpo) return;
 
         if (registrosFunc.length === 0) {
-            corpo.innerHTML = `<tr id="func-linha-vazia"><td colspan="6" style="text-align:center; padding:30px; color:#555; font-style:italic;">Nenhum consumo registrado ainda.</td></tr>`;
-            if (resumoBox) resumoBox.style.display = 'none';
+            corpo.innerHTML = `<tr id="func-linha-vazia"><td colspan="2" style="text-align:center; padding:30px; color:#555; font-style:italic;">Nenhum consumo registrado ainda.</td></tr>`;
             if (totalGeral) totalGeral.innerText = 'R$ 0,00';
             return;
         }
 
-        // Agrupar por nome+item para mostrar quantidade
-        const agrupado = {};
-        registrosFunc.forEach((r, idx) => {
-            const chave = `${r.func}||${r.item}||${r.preco}`;
-            if (!agrupado[chave]) {
-                agrupado[chave] = { func: r.func, item: r.item, preco: r.preco, qty: 0, indices: [] };
+        const consumosPorFunc = {};
+        registrosFunc.forEach(r => {
+            if (!consumosPorFunc[r.func]) {
+                consumosPorFunc[r.func] = { total: 0, itens: [] };
             }
-            agrupado[chave].qty++;
-            agrupado[chave].indices.push(idx);
+            consumosPorFunc[r.func].total += r.preco;
+            consumosPorFunc[r.func].itens.push(r);
         });
 
-        corpo.innerHTML = Object.values(agrupado).map(g => `
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:0.2s;"
+        corpo.innerHTML = Object.entries(consumosPorFunc).map(([nome, dados]) => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:0.2s; cursor:pointer;"
+                onclick="window.verDetalhesFuncionario('${nome}')"
                 onmouseover="this.style.background='rgba(255,189,89,0.04)'"
                 onmouseout="this.style.background='none'">
-                <td style="padding:12px 8px; font-weight:700; color:white;">${g.func}</td>
-                <td style="padding:12px 8px; color:#ccc;">${g.item}</td>
-                <td style="padding:12px 8px; text-align:center;">
-                    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
-                        <button onclick="window.alterarQtyFunc('${g.func}','${g.item}',${g.preco},-1)"
-                            style="background:#333; border:none; color:white; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; display:flex; align-items:center; justify-content:center;">−</button>
-                        <span style="font-weight:800; color:var(--gold); min-width:20px; text-align:center;">${g.qty}</span>
-                        <button onclick="window.alterarQtyFunc('${g.func}','${g.item}',${g.preco},1)"
-                            style="background:var(--gold); border:none; color:black; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.9rem; display:flex; align-items:center; justify-content:center;">+</button>
-                    </div>
+                <td style="padding:15px 10px; font-weight:700; color:white; font-size:1rem; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-user-circle" style="color:var(--gold); font-size:1.1rem;"></i>
+                    <span>${nome}</span>
                 </td>
-                <td style="padding:12px 8px; text-align:right; color:#aaa;">R$ ${g.preco.toFixed(2)}</td>
-                <td style="padding:12px 8px; text-align:right; font-weight:800; color:white;">R$ ${(g.preco * g.qty).toFixed(2)}</td>
-                <td style="padding:12px 8px; text-align:center;">
-                    <button onclick="window.removerGrupoFunc('${g.func}','${g.item}',${g.preco})"
-                        style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:0.9rem; padding:4px 8px; border-radius:6px; transition:0.2s;"
-                        title="Remover">
-                        <i class="fas fa-times"></i>
+                <td style="padding:15px 10px; text-align:center;">
+                    <button class="btn-confirm" style="width:auto; padding:6px 12px; font-size:0.75rem; border-radius:8px;" onclick="event.stopPropagation(); window.verDetalhesFuncionario('${nome}')">
+                        <i class="fas fa-eye"></i> VER ITENS
                     </button>
                 </td>
             </tr>
         `).join('');
 
-        // Resumo por pessoa
-        const porPessoa = {};
-        registrosFunc.forEach(r => {
-            if (!porPessoa[r.func]) porPessoa[r.func] = 0;
-            porPessoa[r.func] += r.preco;
-        });
-
-        if (resumoLista) {
-            resumoLista.innerHTML = Object.entries(porPessoa).map(([nome, total]) => `
-                <div style="background:rgba(255,189,89,0.07); border:1px solid rgba(255,189,89,0.2); border-radius:12px; padding:12px 18px; display:flex; align-items:center; gap:12px;">
-                    <i class="fas fa-user-circle" style="color:var(--gold); font-size:1.2rem;"></i>
-                    <div>
-                        <div style="font-weight:800; color:white; font-size:0.9rem;">${nome}</div>
-                        <div style="color:var(--gold); font-weight:700; font-size:1rem;">R$ ${total.toFixed(2)}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-        if (resumoBox) resumoBox.style.display = 'block';
-
         const totalGeralVal = registrosFunc.reduce((acc, r) => acc + r.preco, 0);
         if (totalGeral) totalGeral.innerText = `R$ ${totalGeralVal.toFixed(2)}`;
     }
+
+    // ── MODAL DE DETALHES COM SENHA ──────────────────────────────────────────
+    window.verDetalhesFuncionario = async (nome) => {
+        const autorizado = await window.validarSenha();
+        if (!autorizado) {
+            Swal.fire({ icon:'error', title:'Acesso Negado', text:'Senha administrativa incorreta!', confirmButtonColor:'#dfbd59' });
+            return;
+        }
+        window.verDetalhesFuncionarioDireto(nome);
+    };
+
+    window.verDetalhesFuncionarioDireto = (nome) => {
+        const itensFunc = registrosFunc.filter(r => r.func === nome);
+        const agrupado = {};
+        itensFunc.forEach(item => {
+            const chave = `${item.item}||${item.preco}`;
+            if (!agrupado[chave]) {
+                agrupado[chave] = { item: item.item, preco: item.preco, qty: 0 };
+            }
+            agrupado[chave].qty++;
+        });
+
+        const total = itensFunc.reduce((acc, r) => acc + r.preco, 0);
+
+        Swal.fire({
+            title: `<span style="font-size:1.1rem; color:#fff;"><i class="fas fa-user-circle" style="color:var(--gold);"></i> CONSUMO: <b style="color:var(--gold);">${nome}</b></span>`,
+            html: `
+                <div style="max-height:350px; overflow-y:auto; margin: 15px 0;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #444; color:#aaa; font-weight:800; text-transform:uppercase; font-size:0.7rem;">
+                                <th style="padding:8px 4px;">Item</th>
+                                <th style="padding:8px 4px; text-align:center; width:80px;">Qtd</th>
+                                <th style="padding:8px 4px; text-align:right; width:80px;">Unit.</th>
+                                <th style="padding:8px 4px; text-align:right; width:80px;">Total</th>
+                                <th style="padding:8px 4px; width:40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.values(agrupado).map(g => `
+                                <tr style="border-bottom:1px solid #333;">
+                                    <td style="padding:10px 4px; font-weight:600; color:#eee; word-break:break-word;">${g.item}</td>
+                                    <td style="padding:10px 4px; text-align:center;">
+                                        <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                                            <button type="button" onclick="window.alterarQtyFuncModal('${nome}','${g.item}',${g.preco},-1)"
+                                                style="background:#222; border:1px solid #444; color:white; width:22px; height:22px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.8rem; display:flex; align-items:center; justify-content:center;">−</button>
+                                            <span style="font-weight:800; color:var(--gold); min-width:14px; text-align:center;">${g.qty}</span>
+                                            <button type="button" onclick="window.alterarQtyFuncModal('${nome}','${g.item}',${g.preco},1)"
+                                                style="background:var(--gold); border:none; color:black; width:22px; height:22px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.8rem; display:flex; align-items:center; justify-content:center;">+</button>
+                                        </div>
+                                    </td>
+                                    <td style="padding:10px 4px; text-align:right; color:#bbb;">R$ ${g.preco.toFixed(2)}</td>
+                                    <td style="padding:10px 4px; text-align:right; font-weight:700; color:white;">R$ ${(g.preco * g.qty).toFixed(2)}</td>
+                                    <td style="padding:10px 4px; text-align:center;">
+                                        <button type="button" onclick="window.removerGrupoFuncModal('${nome}','${g.item}',${g.preco})"
+                                            style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:0.85rem; padding:4px;"
+                                            title="Remover">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div style="border-top:1px solid #444; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:#aaa; font-size:0.9rem; text-transform:uppercase;">Total Consumido:</b>
+                    <b style="color:var(--gold); font-size:1.3rem;">R$ ${total.toFixed(2)}</b>
+                </div>
+            `,
+            showConfirmButton: true,
+            confirmButtonText: 'FECHAR',
+            confirmButtonColor: '#da8300',
+            background: '#151515',
+            color: '#fff',
+            width: '550px'
+        });
+    };
+
+    window.alterarQtyFuncModal = (func, item, preco, delta) => {
+        if (delta > 0) {
+            registrosFunc.push({ func, item, preco });
+        } else {
+            const idx = registrosFunc.findLastIndex(r => r.func === func && r.item === item && r.preco === preco);
+            if (idx !== -1) registrosFunc.splice(idx, 1);
+        }
+        salvarFunc();
+        renderizarFunc();
+        if (registrosFunc.filter(r => r.func === func).length > 0) {
+            window.verDetalhesFuncionarioDireto(func);
+        } else {
+            Swal.close();
+        }
+    };
+
+    window.removerGrupoFuncModal = async (func, item, preco) => {
+        const ok = await Swal.fire({
+            title: 'Excluir item?',
+            text: `Deseja remover "${item}" do consumo de ${func}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, remover',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#333',
+            background: '#151515',
+            color: '#fff'
+        });
+        if (ok.isConfirmed) {
+            registrosFunc = registrosFunc.filter(r => !(r.func === func && r.item === item && r.preco === preco));
+            salvarFunc();
+            renderizarFunc();
+            if (registrosFunc.filter(r => r.func === func).length > 0) {
+                window.verDetalhesFuncionarioDireto(func);
+            } else {
+                Swal.close();
+            }
+        }
+    };
 
     // ── ADICIONAR ITEM ──────────────────────────────────────────────────────
     window.adicionarConsumoFunc = () => {
@@ -2262,7 +2642,14 @@
             return;
         }
 
-        const item = JSON.parse(itemRaw);
+        let item;
+        if (itemSel.dataset.customItem) {
+            item = JSON.parse(itemSel.dataset.customItem);
+            delete itemSel.dataset.customItem;
+        } else {
+            item = JSON.parse(itemRaw);
+        }
+
         registrosFunc.push({ func: nome, item: item.n, preco: item.p });
         salvarFunc();
         renderizarFunc();
@@ -2272,27 +2659,102 @@
             title:`${item.n} adicionado para ${nome}`, background:'#1a1a1a', color:'#fff' });
     };
 
-    // ── ALTERAR QUANTIDADE ──────────────────────────────────────────────────
-    window.alterarQtyFunc = (func, item, preco, delta) => {
-        if (delta > 0) {
-            registrosFunc.push({ func, item, preco });
-        } else {
-            const idx = registrosFunc.findLastIndex(r => r.func === func && r.item === item && r.preco === preco);
-            if (idx !== -1) registrosFunc.splice(idx, 1);
-        }
-        salvarFunc();
-        renderizarFunc();
-    };
+    // ── MOSTRAR ADICIONAIS PARA ARTESANAIS OU PETISCOS ────────────────────
+    setTimeout(() => {
+        const sel = document.getElementById('func-item');
+        if (sel) {
+            sel.addEventListener('change', async function() {
+                const itemRaw = this.value;
+                if (!itemRaw) return;
+                const item = JSON.parse(itemRaw);
+                const category = item.cat || "";
+                
+                const isArtesanalOrPetisco = category.toUpperCase().includes("ARTESANAIS") || category.toUpperCase().includes("PETISCOS");
+                
+                if (isArtesanalOrPetisco) {
+                    const precoBase = item.p;
+                    const htmlAdicionais = `
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; margin-top:15px; color:#fff;">
+                            ${window.__listaAdicionais.map((add,index) => `
+                                <div style="display:flex; align-items:center; justify-content:space-between; background:#222; padding:10px; border-radius:8px; border:1px solid #333;">
+                                    <div style="font-size:0.75rem; flex:1;">
+                                        <span style="color:white; display:block; font-weight:bold;">${add.n}</span>
+                                        <span style="color:var(--gold);">+ R$ ${add.p.toFixed(2)}</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:10px; background:#111; border-radius:6px; padding:2px 5px;">
+                                        <button type="button" onclick="let inp=document.getElementById('cant-add-func-${index}'); if(inp.value > 0) inp.value--; inp.dispatchEvent(new Event('change',{bubbles:true}))"
+                                            style="background:none; border:none; color:var(--gold); font-size:1.2rem; cursor:pointer; font-weight:bold; width:25px; line-height:1;">-</button>
+                                        <input type="number" class="cant-add-func" id="cant-add-func-${index}" data-index="${index}" value="0" min="0" max="10" readonly
+                                            style="width:25px; background:none; border:none; color:white; text-align:center; font-weight:bold; font-size:0.9rem;">
+                                        <button type="button" onclick="let inp=document.getElementById('cant-add-func-${index}'); inp.value++; inp.dispatchEvent(new Event('change',{bubbles:true}))"
+                                            style="background:none; border:none; color:var(--gold); font-size:1.2rem; cursor:pointer; font-weight:bold; width:25px; line-height:1;">+</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top:20px; border-top:1px solid #444; padding-top:15px; font-weight:800; font-size:1.3rem; color:white; text-align:center;">
+                            TOTAL ITEM: <span id="preview-total-item-func" style="color:var(--gold);">R$ ${precoBase.toFixed(2)}</span>
+                        </div>`;
 
-    // ── REMOVER GRUPO ───────────────────────────────────────────────────────
-    window.removerGrupoFunc = (func, item, preco) => {
-        registrosFunc = registrosFunc.filter(r => !(r.func === func && r.item === item && r.preco === preco));
-        salvarFunc();
-        renderizarFunc();
-    };
+                    const { isConfirmed } = await Swal.fire({
+                        title: `<span style="font-size:0.9rem; color:#888;">ADICIONAIS PARA:</span><br><b style="color:var(--gold)">${item.n.toUpperCase()}</b>`,
+                        html: htmlAdicionais,
+                        showCancelButton: true,
+                        confirmButtonText: 'CONFIRMAR',
+                        cancelButtonText: 'SEM ADICIONAIS',
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#888',
+                        background: '#1a1a1a',
+                        color: '#fff',
+                        width: '580px',
+                        didOpen: () => {
+                            const inputs = document.querySelectorAll('.cant-add-func');
+                            const totalDisplay = document.getElementById('preview-total-item-func');
+                            const containerHtml = document.querySelector('.swal2-html-container');
+                            if (containerHtml) {
+                                containerHtml.addEventListener('change', () => {
+                                    let extra = 0;
+                                    inputs.forEach(input => {
+                                        const qtd = parseInt(input.value);
+                                        if (qtd > 0) extra += qtd * window.__listaAdicionais[input.dataset.index].p;
+                                    });
+                                    if (totalDisplay) totalDisplay.innerText = `R$ ${(precoBase + extra).toFixed(2)}`;
+                                });
+                            }
+                        }
+                    });
+
+                    if (isConfirmed) {
+                        let precoFinal = precoBase, listaNomesAdd = [];
+                        document.querySelectorAll('.cant-add-func').forEach(input => {
+                            const qtd = parseInt(input.value);
+                            if (qtd > 0) {
+                                const itemAdd = window.__listaAdicionais[input.dataset.index];
+                                precoFinal += qtd * itemAdd.p;
+                                listaNomesAdd.push(`${qtd}x ${itemAdd.n}`);
+                            }
+                        });
+                        let nomeFinal = item.n;
+                        if (listaNomesAdd.length > 0) nomeFinal += ` (+ ${listaNomesAdd.join(', ')})`;
+                        this.dataset.customItem = JSON.stringify({ n: nomeFinal, p: precoFinal });
+                    } else {
+                        delete this.dataset.customItem;
+                    }
+                } else {
+                    delete this.dataset.customItem;
+                }
+            });
+        }
+    }, 1000);
 
     // ── LIMPAR TUDO ─────────────────────────────────────────────────────────
     window.limparConsumoFunc = async () => {
+        const autorizado = await window.validarSenha();
+        if (!autorizado) {
+            Swal.fire({ icon:'error', title:'Acesso Negado', text:'Senha administrativa incorreta!', confirmButtonColor:'#dfbd59' });
+            return;
+        }
+
         const ok = await Swal.fire({
             title:'Limpar registros?', text:'Todos os consumos do dia serão apagados.',
             icon:'warning', showCancelButton:true, confirmButtonColor:'#c62828',
@@ -2306,8 +2768,6 @@
         }
     };
 
-    // ── INICIALIZAR ─────────────────────────────────────────────────────────
-    // Aguarda o cardápio carregar (módulo async)
     function tentarInicializar(tentativas) {
         if (window.__cardapio) {
             popularSelectFunc();
