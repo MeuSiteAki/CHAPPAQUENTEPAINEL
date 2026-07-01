@@ -1128,7 +1128,7 @@
     window.abrirMesa = async (n) => {
         const { value: garcom } = await Swal.fire({
             title: `ABRIR MESA ${n}`, input:'radio',
-            inputOptions: { 'Rainara':'Rainara','Fernando':'Fernando','Leona':'Leona' },
+            inputOptions: { 'Rainara':'Rainara','Fernando':'Fernando' },
             inputValidator: (v) => { if (!v) return 'Você precisa selecionar um garçom!'; },
             confirmButtonText:'ABRIR MESA', background:'#fff', color:'#0d0d0d',
             confirmButtonColor:'#da8300',
@@ -2781,3 +2781,6 @@
 </script>
 </body>
 </html>
+
+
+Leona
