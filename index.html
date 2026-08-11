@@ -836,33 +836,25 @@
 
     // CARDÁPIO INTEGRADO
     const cardapio = {
-        "🍔 ARTESANAIS 75g": [
-            { id:69,  n:"Misto-Quente",           p:6.00 },
-            { id:1,  n:"Chappa Kids",           p:13.00 },
-            { id:2,  n:"Chappa Quente",          p:14.00 },
-            { id:3,  n:"X-Burguer",              p:15.00 },
-            { id:4,  n:"X-Salada Especial",      p:15.00 },
-            { id:5,  n:"X-Calabresa",            p:16.00 },
-            { id:6,  n:"X-Bacon",                p:17.00 },
-            { id:7,  n:"X-Tudo",                 p:18.00 },
-            { id:8,  n:"X-Queijo Especial",      p:20.00 },
-            { id:9,  n:"Mega Chappa",            p:26.00 },
-            { id:10, n:"Cheddar Burguer",        p:28.00 }
+        "🍔 ARTESANAIS 90g": [
+            { id: 1, n: "Chappa Quente",    p: 15.00 },
+    { id: 2, n: "X-Salada Especial",p: 18.00 },
+    { id: 3, n: "X-Bacon",          p: 20.00 },
+    { id: 4, n: "X-Tudo",           p: 22.00 },
+    { id: 5, n: "Mega Chappa",      p: 27.00 },
         ],
-        "🍔 ARTESANAIS 120g": [
-            { id:86, n:"Duplo Nordestino",    p:28.99 },
-            { id:87, n:"Cheff Burguer",    p:24.99 },
-            { id:88, n:"Arretado",    p:23.99 },
-            { id:11, n:"Hambúrguer Clássico",    p:18.00 },
-            { id:12, n:"Cheddar Bacon",          p:22.00 },
-            { id:13, n:"Chappa Burguer Picante", p:25.00 },
-            { id:14, n:"Big Burguer Calabresa",  p:27.00 },
-            { id:15, n:"X Bacon Duplo",          p:27.00 },
-            { id:16, n:"Chappa Quente Especial", p:35.00 }
+        "🍔 ARTESANAIS 160g": [
+           { id: 6, n: "X-Bacon Duplo",    p: 28.00 },
+    { id: 7, n: "Chef Burguer",     p: 26.00 },
+    { id: 8, n: "Nordestino",       p: 30.00 },
+    { id: 9, n: "Arretado",         p: 25.00 }
         ],
         "🍔 COMBOS": [
             { id:85, n:"COMBO Classico",    p:29.99 },
-            { id:86, n:"Combo X-Burguers", p:32.99 }
+            { id:86, n:"Combo X-Burguers", p:32.99 },
+            { id:87, n:"Combo Nordestino", p:46.99 },
+            { id:88, n:"Combo Casal", p:95.99 },
+            { id:89, n:"Combo Familia", p:135.99 },
         ],
         "🍟 PETISCOS": [
             { id:17, n:"Calabresa Frita Acebolada",    p:35.00 },
@@ -880,7 +872,7 @@
         ],
         "🥤 BEBIDAS": [
             { id:24, n:"H2O Limoneto 500ml",     p:8.00  },
-            { id:25, n:"Água mineral (sem gás)", p:4.00  },
+            { id:25, n:"Água mineral (sem gás)", p:3.00  },
             { id:40, n:"River 250ml",              p:4.00  },
             { id:27, n:"Coca-Cola 350ml",              p:6.00  },
             { id:41, n:"Fanta 350ml",              p:6.00  },
@@ -903,7 +895,7 @@
             { id:53, n:"Suco de Acerola",              p:7.00  },
             { id:54, n:"Suco de Cupuaçu",              p:7.00  },
             { id:55, n:"Suco de Goiaba",              p:7.00  },
-            { id:68, n:"Água com gás",        p:5.00  },
+            { id:68, n:"Água com gás",        p:4.00  },
             { id:34, n:"Água 1,5 litros",        p:7.00  },
             { id:35, n:"Red Bull",               p:15.00 },
             { id:64, n:"Monster 269ml",               p:15.00 },
@@ -932,7 +924,6 @@
             { id:71, n:"Salgados Grande",p:5.00  },
             { id:74, n:"Bolacha Wafer",p:6.00  },
             { id:75, n:"Bolacha pequena",p:4.00  },
-            { id:85, n:"Baton chocolate",p:2.00  },
         ]
     };
 
@@ -941,18 +932,14 @@
     let mesas = [], mesaAtiva = null, carrinhoTemp = [], somAtivo = true, carregado = false;
 
     const listaAdicionais = [
-        { n:"Hamb. 75g",      p:6.00 },
-        { n:"Bacon",          p:5.00 },
-        { n:"Calabresa",      p:5.00 },
-        { n:"Hamb. 120g",     p:8.00 },
-        { n:"Cheddar",        p:4.00 },
-        { n:"Salsicha",       p:3.00 },
-        { n:"Ovo",            p:3.00 },
-        { n:"Presunto",       p:3.00 },
-        { n:"Queijo",         p:3.00 },
-        { n:"Barbecue",       p:3.00 },
-        { n:"Banana",         p:3.00 },
-        { n:"Geleia Pimenta", p:5.00 }
+        { n: "Hamb. 90g",  p: 8.00 },
+    { n: "Bacon",      p: 5.00 },
+    { n: "Calabresa",  p: 5.00 },
+    { n: "Hamb. 160g", p: 10.00 },
+    { n: "Cheddar",    p: 4.00 },
+    { n: "Ovo",        p: 3.00 },
+    { n: "Queijo",     p: 3.00 },
+    { n: "Banana",     p: 3.00 }
     ];
 
     window.__listaAdicionais = listaAdicionais;
