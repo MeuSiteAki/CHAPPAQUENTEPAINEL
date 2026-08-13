@@ -1344,6 +1344,258 @@
             }
         };
 
+        // ===== RESTAURA CARDÁPIO E CARRINHO DO PDV / WHATSAPP =====
+let carrinhoPDV = [];
+
+function renderCategoriasPDV() {
+    const cont = document.getElementById('categorias-pdv');
+    if (!cont) return;
+    const categorias = Object.keys(cardapio);
+    cont.innerHTML = categorias.map((cat, idx) => `
+        <button onclick="window.selecionarCategoriaPDV('${cat.replace(/'/g, "\\'")}')"
+            style="background:${idx === 0 ? 'var(--gold)' : '#1a1a1a'}; color:${idx === 0 ? 'black' : '#ccc'}; border:1px solid var(--gold);">
+            ${cat}
+        </button>
+    `).join('');
+    if (categorias.length > 0) window.selecionarCategoriaPDV(categorias[0]);
+}
+
+window.selecionarCategoriaPDV = (cat) => {
+    document.querySelectorAll('#categorias-pdv button').forEach(btn => {
+        const ativa = btn.innerText.trim() === cat.trim();
+        btn.style.background = ativa ? 'var(--gold)' : '#1a1a1a';
+        btn.style.color = ativa ? 'black' : '#ccc';
+    });
+    const cont = document.getElementById('grid-atalhos');
+    if (!cont) return;
+    const itens = cardapio[cat] || [];
+    cont.innerHTML = itens.map(item => `
+        <button onclick="window.addItemPDV('${item.n.replace(/'/g, "\\'")}', ${item.p}, '${cat.replace(/'/g, "\\'")}')"
+            style="background:var(--glass); border:1px solid var(--glass-border); color:white; border-radius:12px; padding:12px 8px; cursor:pointer; text-align:center; display:flex; flex-direction:column; gap:5px;">
+            <b style="font-size:0.85rem;">${item.n}</b>
+            <span style="color:var(--gold); font-weight:bold; font-size:0.85rem;">R$ ${item.p.toFixed(2)}</span>
+        </button>
+    `).join('');
+};
+
+const categoriasSemAdicionaisPDV = ["🥤 BEBIDAS", "🍺 CERVEJAS", "🍬 DIVERSOS"];
+
+window.addItemPDV = async (nome, preco, categoria) => {
+    let precoFinal = preco;
+    let obsFinal = '';
+
+    if (!categoriasSemAdicionaisPDV.includes(categoria)) {
+        const { isConfirmed } = await Swal.fire({
+            title: 'ADICIONAIS', text: nome,
+            html: `<div id="container-adicionais-pdv" style="text-align:left; max-height:350px; overflow-y:auto; padding:5px;">
+            ${listaAdicionais.map((ad, index) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:8px;">
+                    <div><b style="font-size:0.9rem; color:#333;">${ad.n}</b><br><span style="color:#2e7d32; font-weight:700; font-size:0.85rem;">+ R$ ${ad.p.toFixed(2)}</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button onclick="let inp=document.getElementById('adp-${index}'); if(inp.value>0) inp.value--;" style="width:32px; height:32px; border-radius:8px; border:1px solid #ddd; background:#f8f8f8; font-weight:bold;">-</button>
+                        <input type="number" id="adp-${index}" value="0" min="0" readonly style="width:30px; border:none; text-align:center; font-weight:800; background:transparent; font-size:1.1rem; color:#000;">
+                        <button onclick="document.getElementById('adp-${index}').value++;" style="width:32px; height:32px; border-radius:8px; border:none; background:var(--gold); color:white; font-weight:bold;">+</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>`,
+            showCancelButton: true, confirmButtonText: 'CONFIRMAR', cancelButtonText: 'SEM ADICIONAIS',
+            confirmButtonColor: '#2e7d32', cancelButtonColor: '#888'
+        });
+        if (isConfirmed) {
+            let listaTextoAdicionais = [];
+            listaAdicionais.forEach((ad, index) => {
+                const inp = document.getElementById(`adp-${index}`);
+                const qtd = inp ? parseInt(inp.value) : 0;
+                if (qtd > 0) { precoFinal += (ad.p * qtd); listaTextoAdicionais.push(`${qtd} - ${ad.n}`); }
+            });
+            if (listaTextoAdicionais.length > 0) obsFinal = "ADICIONAIS: " + listaTextoAdicionais.join(', ');
+        }
+    }
+
+    carrinhoPDV.push({ n: nome, p: precoFinal, obs: obsFinal, q: 1 });
+    renderCarrinhoPDV();
+    Swal.fire({ text: `+ ${nome} adicionado!`, toast: true, position: 'top-end', showConfirmButton: false, timer: 1000, background: '#2e7d32', color: '#fff' });
+};
+
+function renderCarrinhoPDV() {
+    const lista = document.getElementById('pdv-lista-itens');
+    const totalEl = document.getElementById('pdv-total-valor');
+    if (!lista || !totalEl) return;
+    if (carrinhoPDV.length === 0) {
+        lista.innerHTML = '<p style="text-align:center; color:#444; margin-top:30px;">Carrinho vazio</p>';
+        totalEl.innerText = 'R$ 0,00';
+        return;
+    }
+    lista.innerHTML = carrinhoPDV.map((item, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:8px 10px; border-bottom:1px solid #222;">
+            <div style="flex:1;">
+                <b style="font-size:0.85rem;">${item.n}</b><br>
+                <span style="color:var(--gold); font-size:0.8rem;">R$ ${item.p.toFixed(2)}</span>
+                ${item.obs ? `<br><small style="color:#888;">${item.obs}</small>` : ''}
+            </div>
+            <button onclick="window.removerItemPDV(${idx})" style="background:none; border:none; color:#ff4d4d; cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+    const total = carrinhoPDV.reduce((acc, i) => acc + i.p, 0);
+    totalEl.innerText = `R$ ${total.toFixed(2)}`;
+}
+
+window.ajustarCamposEndereco = () => {
+    const tipo = document.getElementById('pdv-tipo').value;
+    const container = document.getElementById('container-endereco-pdv');
+    if (container) container.style.display = tipo === 'RETIRADA' ? 'none' : 'block';
+};
+
+window.confirmarPedidoPDV = async () => {
+    const nome = document.getElementById('pdv-nome').value.trim();
+    if (!nome) { Swal.fire({ icon: 'warning', text: 'Informe o nome do cliente!' }); return; }
+    if (carrinhoPDV.length === 0) { Swal.fire({ icon: 'warning', text: 'Carrinho vazio!' }); return; }
+
+    const tel = document.getElementById('pdv-tel').value.trim();
+    const tipo = document.getElementById('pdv-tipo').value;
+    const pagamento = document.getElementById('pdv-pagamento').value;
+    const obs = document.getElementById('pdv-obs').value.trim();
+    const bairro = document.getElementById('pdv-end').value;
+    const rua = document.getElementById('pdv-rua').value.trim();
+
+    const subtotal = carrinhoPDV.reduce((acc, i) => acc + i.p, 0);
+    const endereco = tipo === 'RETIRADA' ? 'RETIRADA NO LOCAL' : `${bairro} - ${rua}`;
+
+    await addDoc(collection(db, "pedidos"), {
+        nome, telefone: tel, tipo: "SITE", tipoPedido: tipo,
+        itens: carrinhoPDV, subtotal, total: subtotal,
+        pagamento, end: endereco, obs, data: serverTimestamp()
+    });
+
+    carrinhoPDV = [];
+    renderCarrinhoPDV();
+    document.getElementById('pdv-nome').value = '';
+    document.getElementById('pdv-tel').value = '';
+    document.getElementById('pdv-obs').value = '';
+    Swal.fire({ title: 'Pedido lançado!', icon: 'success', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+};
+
+renderCategoriasPDV();
+window.ajustarCamposEndereco();
+// ===== FIM DO BLOCO PDV =====
+
+// ===== RESTAURA ABA FUNCIONÁRIOS (SELECIONAR ITEM + ADICIONAIS) =====
+const categoriasSemAdicionaisFunc = ["🥤 BEBIDAS", "🍺 CERVEJAS", "🍬 DIVERSOS"];
+
+function renderSelectItensFunc() {
+    const select = document.getElementById('func-item');
+    if (!select) return;
+    let html = '<option value="">-- Selecione o item --</option>';
+    Object.keys(cardapio).forEach(cat => {
+        html += `<optgroup label="${cat}">`;
+        cardapio[cat].forEach(item => {
+            html += `<option value="${item.n}|||${item.p}|||${cat}">${item.n} - R$ ${item.p.toFixed(2)}</option>`;
+        });
+        html += `</optgroup>`;
+    });
+    select.innerHTML = html;
+}
+
+window.adicionarConsumoFunc = async () => {
+    const nomeFunc = document.getElementById('func-nome').value.trim();
+    const selecionado = document.getElementById('func-item').value;
+
+    if (!nomeFunc) { Swal.fire({ icon: 'warning', text: 'Informe o nome do funcionário!' }); return; }
+    if (!selecionado) { Swal.fire({ icon: 'warning', text: 'Selecione um item!' }); return; }
+
+    const [nomeItem, precoStr, categoria] = selecionado.split('|||');
+    let precoFinal = parseFloat(precoStr);
+    let obsFinal = '';
+
+    if (!categoriasSemAdicionaisFunc.includes(categoria)) {
+        const { isConfirmed } = await Swal.fire({
+            title: 'ADICIONAIS', text: nomeItem,
+            html: `<div id="container-adicionais-func" style="text-align:left; max-height:350px; overflow-y:auto; padding:5px;">
+            ${listaAdicionais.map((ad, index) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:8px;">
+                    <div><b style="font-size:0.9rem; color:#333;">${ad.n}</b><br><span style="color:#2e7d32; font-weight:700; font-size:0.85rem;">+ R$ ${ad.p.toFixed(2)}</span></div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button onclick="let inp=document.getElementById('adf-${index}'); if(inp.value>0) inp.value--;" style="width:32px; height:32px; border-radius:8px; border:1px solid #ddd; background:#f8f8f8; font-weight:bold;">-</button>
+                        <input type="number" id="adf-${index}" value="0" min="0" readonly style="width:30px; border:none; text-align:center; font-weight:800; background:transparent; font-size:1.1rem; color:#000;">
+                        <button onclick="document.getElementById('adf-${index}').value++;" style="width:32px; height:32px; border-radius:8px; border:none; background:var(--gold); color:white; font-weight:bold;">+</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>`,
+            showCancelButton: true, confirmButtonText: 'CONFIRMAR', cancelButtonText: 'SEM ADICIONAIS',
+            confirmButtonColor: '#2e7d32', cancelButtonColor: '#888'
+        });
+        if (isConfirmed) {
+            let listaTextoAdicionais = [];
+            listaAdicionais.forEach((ad, index) => {
+                const inp = document.getElementById(`adf-${index}`);
+                const qtd = inp ? parseInt(inp.value) : 0;
+                if (qtd > 0) { precoFinal += (ad.p * qtd); listaTextoAdicionais.push(`${qtd} - ${ad.n}`); }
+            });
+            if (listaTextoAdicionais.length > 0) obsFinal = "ADICIONAIS: " + listaTextoAdicionais.join(', ');
+        }
+    }
+
+    await addDoc(collection(db, "consumo_funcionarios"), {
+        funcionario: nomeFunc, item: nomeItem, preco: precoFinal, obs: obsFinal, data: serverTimestamp()
+    });
+
+    document.getElementById('func-item').value = '';
+    Swal.fire({ text: `+ ${nomeItem} adicionado para ${nomeFunc}`, toast: true, position: 'top-end', showConfirmButton: false, timer: 1200, background: '#2e7d32', color: '#fff' });
+};
+
+window.limparConsumoFunc = async () => {
+    const confirmacao = await Swal.fire({
+        title: 'LIMPAR TUDO?', text: 'Isso vai apagar todo o registro de consumo de funcionários.',
+        icon: 'warning', showCancelButton: true, confirmButtonColor: '#c62828', confirmButtonText: 'Sim, limpar'
+    });
+    if (confirmacao.isConfirmed) {
+        const snap = await getDocs(collection(db, "consumo_funcionarios"));
+        await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "consumo_funcionarios", d.id))));
+    }
+};
+
+window.removerConsumoFunc = async (id) => {
+    await deleteDoc(doc(db, "consumo_funcionarios", id));
+};
+
+onSnapshot(query(collection(db, "consumo_funcionarios"), orderBy("data", "desc")), (snap) => {
+    const corpo = document.getElementById('func-tabela-corpo');
+    const totalEl = document.getElementById('func-total-geral');
+    if (!corpo) return;
+
+    if (snap.empty) {
+        corpo.innerHTML = `<tr id="func-linha-vazia"><td colspan="2" style="text-align:center; padding:30px; color:#555; font-style:italic;">Nenhum consumo registrado ainda.</td></tr>`;
+        if (totalEl) totalEl.innerText = 'R$ 0,00';
+        return;
+    }
+
+    let total = 0;
+    corpo.innerHTML = snap.docs.map(docSnap => {
+        const c = docSnap.data();
+        total += parseFloat(c.preco || 0);
+        return `
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+            <td style="padding:10px 8px;">
+                <b style="color:white;">${c.funcionario}</b><br>
+                <span style="color:var(--gold); font-size:0.85rem;">${c.item} — R$ ${parseFloat(c.preco).toFixed(2)}</span>
+                ${c.obs ? `<br><small style="color:#888;">${c.obs}</small>` : ''}
+            </td>
+            <td style="text-align:center; padding:10px 8px;">
+                <button onclick="window.removerConsumoFunc('${docSnap.id}')" style="background:rgba(255,77,77,0.15); border:1px solid rgba(255,77,77,0.3); color:#ff5252; padding:8px 14px; border-radius:8px; cursor:pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    if (totalEl) totalEl.innerText = `R$ ${total.toFixed(2)}`;
+});
+
+renderSelectItensFunc();
+// ===== FIM DO BLOCO FUNCIONÁRIOS =====
+
         renderMenu();
     </script>
 
