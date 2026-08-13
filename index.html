@@ -421,7 +421,7 @@
     <!-- BOTÕES FLUTUANTES -->
     <div class="admin-actions">
         <button id="btn-som" class="btn-fab" style="background:#2e7d32"><i class="fas fa-bell"></i></button>
-        <button id="btn-limpar" class="btn-fab" style="background:#c62828"><i class="fas fa-trash-alt"></i></button>
+        <button id="btn-limpar" class="btn-fab" style="background:#c62828" onclick="window.zerarTudoAdm()"><i class="fas fa-trash-alt"></i></button>
     </div>
 
     <!-- CONTEÚDO PRINCIPAL -->
@@ -1248,9 +1248,10 @@
                         </div>
                     </div>
                     <div style="font-size:0.85rem; color:#ccc; margin-bottom:10px;">
-                        ${p.telefone ? `<div><i class="fab fa-whatsapp" style="color:#25d366"></i> ${p.telefone}</div>` : ''}
-                        <div><i class="fas ${isRetirada ? 'fa-store' : 'fa-map-marker-alt'}"></i> ${p.end}</div>
-                    </div>
+    ${p.telefone ? `<div><i class="fab fa-whatsapp" style="color:#25d366"></i> ${p.telefone}</div>` : ''}
+    <div><i class="fas ${isRetirada ? 'fa-store' : 'fa-map-marker-alt'}"></i> ${p.end}</div>
+    <div><i class="fas fa-clock" style="color:var(--gold)"></i> ${p.data && p.data.toDate ? p.data.toDate().toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : ''}</div>
+</div>
                     ${!emTransito && p.tipo === "SITE" ? `
                         <div style="display:flex; gap:8px; margin-bottom:15px;">
                             <button onclick="window.open('https://wa.me/55${telefoneLimpo}?text=${msgRecebido}')" style="flex:1; background:#333; color:#fff; border:1px solid #444; padding:8px; border-radius:8px; font-size:0.7rem; cursor:pointer; font-weight:600;">CONFIRMAR</button>
@@ -1313,6 +1314,27 @@
             }
             carregado = true;
         });
+        window.zerarTudoAdm = async () => {
+    const autorizado = await window.validarSenha();
+    if (!autorizado) { Swal.fire({ icon: 'error', text: 'Senha incorreta!' }); return; }
+
+    const confirmacao = await Swal.fire({
+        title: 'ZERAR TUDO?',
+        text: 'Isso vai apagar TODOS os pedidos do painel. Essa ação não pode ser desfeita.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c62828',
+        confirmButtonText: 'Sim, zerar tudo',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (confirmacao.isConfirmed) {
+        const snap = await getDocs(collection(db, "pedidos"));
+        const promessas = snap.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
+        await Promise.all(promessas);
+        Swal.fire({ title: 'Tudo zerado!', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+    }
+};
 
         window.deletarPedidoDireto = async (id) => {
             const autorizado = await window.validarSenha();
@@ -1405,3 +1427,5 @@
 </body>
 
 </html>
+
+
