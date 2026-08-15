@@ -346,6 +346,17 @@
         .slider:before { position:absolute; content:""; height:17px; width:17px; left:3.5px; bottom:3.5px; background-color:white; transition:.3s; border-radius:50%; }
         input:checked + .slider { background-color: var(--gold); }
         input:checked + .slider:before { transform: translateX(22px); }
+        @media print {
+    body * { visibility: hidden; }
+    #nota-impressao-mesa,
+    #nota-impressao-mesa * { visibility: visible; }
+    #nota-impressao-mesa {
+        position: fixed; top: 0; left: 0;
+        width: 80mm; background: white; color: black; display: block !important;
+    }
+}
+#nota-impressao-mesa .nota-linha { border-top: 1px dashed #000; margin: 6px 0; }
+#nota-impressao-mesa .nota-item { display: flex; justify-content: space-between; margin: 3px 0; }
     </style>
 </head>
 
@@ -1597,6 +1608,65 @@ renderSelectItensFunc();
 // ===== FIM DO BLOCO FUNCIONÁRIOS =====
 
         renderMenu();
+
+        // ENVIA PARA IMPRESSÃO AUTOMÁTICA (via servidor Node.js) — conta parcial da mesa
+window.imprimirNotaMesa = async (n) => {
+    const m = mesas.find(mesa => mesa.n === n);
+    if (!m || !m.itens || m.itens.length === 0) {
+        Swal.fire({ title: 'Mesa vazia', text: 'Não há itens para imprimir.', icon: 'warning', timer: 1500, showConfirmButton: false });
+        return;
+    }
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            nome: `MESA ${n}`,
+            tipo: "PARCIAL",
+            parcial: true,
+            itens: m.itens,
+            totalFinal: m.total,
+            garcom: m.garcom || null,
+            pagamento: null,
+            data: serverTimestamp()
+        });
+        Swal.fire({ title: 'Enviado para impressão!', icon: 'success', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        console.error("Erro ao enviar para impressão:", e);
+        Swal.fire('Erro', 'Não foi possível enviar para a impressora.', 'error');
+    }
+};
+
+// REIMPRIME PELO NAVEGADOR (usa a nota escondida + window.print)
+// REIMPRIME AUTOMATICAMENTE (via servidor Node.js) — igual à impressão das mesas
+window.reimprimirPedido = async (id) => {
+    const snap = window.__ultimoSnap;
+    if (!snap) return;
+
+    const docSnap = snap.docs.find(d => d.id === id);
+    if (!docSnap) return;
+
+    const p = docSnap.data();
+
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            nome: p.nome || 'Cliente',
+            tipo: "PARCIAL",
+            parcial: true,
+            reimpressao: true,
+            itens: p.itens || [],
+            totalFinal: parseFloat(p.totalFinal || p.total || p.subtotal || 0),
+            telefone: p.telefone || null,
+            end: p.end || null,
+            tipoPedido: p.tipoPedido || null,
+            garcom: p.garcom || null,
+            pagamento: p.pagamento || null,
+            obs: p.obs || null,
+            data: serverTimestamp()
+        });
+        Swal.fire({ title: 'Reimpressão enviada!', icon: 'success', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false });
+    } catch (e) {
+        console.error("Erro ao reimprimir:", e);
+        Swal.fire('Erro', 'Não foi possível enviar para a impressora.', 'error');
+    }
+};
     </script>
 
     <script>
