@@ -1170,6 +1170,35 @@
             }
         };
 
+        window.removerItemMesa = async (n, idx) => {
+    const m = mesas.find(mesa => mesa.n === n);
+    if (!m || !m.itens || !m.itens[idx]) return;
+
+    const itemRemovido = m.itens[idx];
+
+    const confirm = await Swal.fire({
+        title: `Remover item?`,
+        text: itemRemovido.n,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c62828',
+        confirmButtonText: 'Remover',
+        cancelButtonText: 'Cancelar'
+    });
+    if (!confirm.isConfirmed) return;
+
+    const novosItens = [...m.itens];
+    novosItens.splice(idx, 1);
+    const novoTotal = novosItens.reduce((acc, i) => acc + i.p, 0);
+
+    await updateDoc(doc(db, "estado_mesas", `mesa_${n}`), {
+        itens: novosItens,
+        total: novoTotal
+    });
+
+    Swal.fire({ text: `- ${itemRemovido.n} removido`, toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, background: '#c62828', color: '#fff' });
+};
+
         window.abrirMesa = async (n) => {
             const { value: garcom } = await Swal.fire({
                 title: `ABRIR MESA ${n}`, input: 'radio',
