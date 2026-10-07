@@ -1110,56 +1110,77 @@
             renderMesas();
         });
 
-        function renderMesas() {
-            const container = document.getElementById('container-mesas');
-            if (!container) return;
-            container.innerHTML = mesas.map(m => `
-            <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
-                ${m.aberta ? `<button class="btn-cancelar-topo" onclick="window.cancelarMesa(${m.n})"><i class="fas fa-times"></i></button>` : ''}
-                <div style="font-size:2rem; margin-bottom:8px;"><i class="fas fa-couch"></i></div>
-                <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
-                ${m.aberta && m.garcom ? `<div style="color:var(--gold); font-size:0.75rem; font-weight:700; margin-top:2px; text-transform:uppercase;"><i class="fas fa-user-check" style="font-size:0.6rem;"></i> ${m.garcom}</div>` : ''}
+       function renderMesas() {
+    const container = document.getElementById('container-mesas');
+    if (!container) return;
 
-                <div class="mesa-itens-lista">
-                    ${m.itens.length > 0
-                    ? m.itens.map((item, idx) => `
-                            <div class="mesa-item-row">
-                                <div class="mesa-item-info">
-                                    <b>${item.n}</b>
-                                    ${item.obs ? `<br><span style="color:var(--gold); font-style:italic; font-size:0.75rem;">(${item.obs})</span>` : ''}
-                                </div>
-                                ${m.aberta ? `
-                                    <button class="btn-remover-item-mesa" onclick="window.removerItemMesa(${m.n}, ${idx})" title="Remover este item">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                ` : ''}
+    // Agrupa itens iguais (mesmo nome + preço + obs), guardando o índice original
+    function agruparItens(itens) {
+        const grupos = [];
+        const mapa = {};
+        itens.forEach((item, idx) => {
+            const chave = `${item.n}|||${item.p}|||${item.obs || ''}`;
+            if (mapa[chave] === undefined) {
+                mapa[chave] = grupos.length;
+                grupos.push({ item, qtd: 1, ultimoIdx: idx });
+            } else {
+                grupos[mapa[chave]].qtd++;
+                grupos[mapa[chave]].ultimoIdx = idx;
+            }
+        });
+        return grupos;
+    }
+
+    container.innerHTML = mesas.map(m => {
+        const grupos = agruparItens(m.itens || []);
+        return `
+        <div class="mesa-card ${m.aberta ? 'aberta' : ''}">
+            ${m.aberta ? `<button class="btn-cancelar-topo" onclick="window.cancelarMesa(${m.n})"><i class="fas fa-times"></i></button>` : ''}
+            <div style="font-size:2rem; margin-bottom:8px;"><i class="fas fa-couch"></i></div>
+            <div style="font-weight:800; font-size:1.1rem;">MESA ${m.n}</div>
+            ${m.aberta && m.garcom ? `<div style="color:var(--gold); font-size:0.75rem; font-weight:700; margin-top:2px; text-transform:uppercase;"><i class="fas fa-user-check" style="font-size:0.6rem;"></i> ${m.garcom}</div>` : ''}
+
+            <div class="mesa-itens-lista">
+                ${grupos.length > 0
+                ? grupos.map(g => `
+                        <div class="mesa-item-row">
+                            <div class="mesa-item-info">
+                                <b style="color:var(--gold);">${g.qtd}x</b> <b>${g.item.n}</b>
+                                ${g.item.obs ? `<br><span style="color:var(--gold); font-style:italic; font-size:0.75rem;">(${g.item.obs})</span>` : ''}
                             </div>
-                        `).join('')
-                    : '<i style="color:#555;">Disponível</i>'
-                }
-                </div>
-
-                <div style="color:var(--gold); font-weight:700; margin-bottom:12px; font-size:1.1rem;">R$ ${m.total.toFixed(2)}</div>
-
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    ${!m.aberta
-                    ? `<button class="btn-confirm" onclick="window.abrirMesa(${m.n})">ABRIR</button>`
-                    : `
-                            <button class="btn-confirm" style="background:#333; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.prepararAdd(${m.n})">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="btn-confirm" style="background:#1565c0; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.imprimirNotaMesa(${m.n})" title="Imprimir conta">
-                                <i class="fas fa-print"></i>
-                            </button>
-                            <button class="btn-confirm" style="background:#2e7d32; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.fecharMesa(${m.n})">
-                                <i class="fas fa-check"></i>
-                            </button>
-                        `
-                }
-                </div>
+                            ${m.aberta ? `
+                                <button class="btn-remover-item-mesa" onclick="window.removerItemMesa(${m.n}, ${g.ultimoIdx})" title="Remover 1 unidade">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    `).join('')
+                : '<i style="color:#555;">Disponível</i>'
+            }
             </div>
-        `).join('');
-        }
+
+            <div style="color:var(--gold); font-weight:700; margin-bottom:12px; font-size:1.1rem;">R$ ${m.total.toFixed(2)}</div>
+
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                ${!m.aberta
+                ? `<button class="btn-confirm" onclick="window.abrirMesa(${m.n})">ABRIR</button>`
+                : `
+                        <button class="btn-confirm" style="background:#333; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.prepararAdd(${m.n})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="btn-confirm" style="background:#1565c0; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.imprimirNotaMesa(${m.n})" title="Imprimir conta">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="btn-confirm" style="background:#2e7d32; flex:1; padding:12px 8px; font-size:0.85rem;" onclick="window.fecharMesa(${m.n})">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    `
+            }
+            </div>
+        </div>
+        `;
+    }).join('');
+}
 
         window.cancelarMesa = async (n) => {
             const res = await Swal.fire({
@@ -1784,5 +1805,6 @@ window.reimprimirPedido = async (id) => {
 </body>
 
 </html>
+
 
 
